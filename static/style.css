@@ -1,0 +1,160 @@
+@font-face {
+    font-family: 'PixelFont';
+    src: url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Press Start 2P', cursive;
+    color: #00ff00;
+    cursor: none;
+}
+
+.container {
+    text-align: center;
+    padding: 2em;
+}
+
+.title {
+    font-size: 12em;
+    margin-bottom: 0.5em;
+    text-shadow: 0 0 15px #00ff00;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.menu-form {
+    margin: 0;
+    padding: 0;
+}
+
+.menu-item {
+    background: transparent;
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    padding: 1em 2em;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2em;
+    cursor: none;
+    transition: all 0.3s ease;
+    width: 100%;
+    text-decoration: none;
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+.menu-item:hover, .menu-item.selected {
+    background-color: #00ff00;
+    color: black;
+    box-shadow: 0 0 20px #00ff00;
+}
+
+.menu-item:focus {
+    outline: none;
+}
+
+/* Стили для форм */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.form-group {
+    text-align: left;
+    position: relative;
+}
+
+.form-group::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background-color: #00ff00;
+    opacity: 0;
+    box-shadow: 0 0 10px #00ff00;
+    transition: opacity 0.3s ease;
+}
+
+.form-group:hover::before {
+    opacity: 0.5;
+}
+
+.form-input {
+    width: 100%;
+    padding: 1em;
+    background: transparent;
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1em;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.form-input:hover {
+    border-color: #00ff00;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    background-color: rgba(0, 255, 0, 0.1);
+}
+
+.form-input:focus {
+    outline: none;
+    box-shadow: 0 0 20px #00ff00;
+    background-color: #00ff00;
+    color: black;
+}
+
+.file-label {
+    display: block;
+    padding: 1em;
+    border: 2px solid #00ff00;
+    color: #00ff00;
+    cursor: pointer;
+    text-align: center;
+    font-size: 0.8em;
+}
+
+.file-input {
+    display: none;
+}
+
+.back-link {
+    margin-top: 2em;
+}
+
+/* Placeholder стили */
+::placeholder {
+    color: #00ff00;
+    opacity: 0.5;
+}
+
+/* Убираем автозаполнение браузера */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #00ff00;
+    -webkit-box-shadow: 0 0 0px 1000px #000 inset;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.nav-item.selected {
+    border-color: #00ff00;
+    box-shadow: 0 0 20px #00ff00;
+    background-color: rgba(0, 255, 0, 0.2);
+} 
