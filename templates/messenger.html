@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEXA - Messenger</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="messenger-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- User Profile -->
+            <div class="user-profile nav-item" data-index="0">
+                <img src="{{ url_for('static', filename='uploads/default-avatar.png') }}" alt="Avatar" class="user-avatar">
+                <div class="user-info">
+                    <span class="username">{{ username }}</span>
+                </div>
+            </div>
+
+            <!-- Search -->
+            <div class="search-container">
+                <input type="text" class="search-input nav-item" data-index="1" placeholder="Search users...">
+            </div>
+
+            <!-- Chat List -->
+            <div class="chats-list">
+                <div class="chat-item nav-item" data-index="2">
+                    <img src="{{ url_for('static', filename='uploads/default-avatar.png') }}" alt="Avatar" class="chat-avatar">
+                    <div class="chat-info">
+                        <span class="chat-name">Chat 1</span>
+                        <span class="last-message">Last message...</span>
+                    </div>
+                </div>
+                <!-- Chats will be added dynamically here -->
+            </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-area">
+            <div class="chat-header">
+                <h2 class="chat-title"></h2>
+            </div>
+            <div class="messages-container">
+                <!-- Messages will be displayed here -->
+            </div>
+            <div class="message-input-container">
+                <input type="text" class="message-input nav-item" data-index="3" placeholder="Type a message...">
+                <button class="send-button nav-item" data-index="4">Send</button>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='messenger-navigation.js') }}"></script>
+</body>
+</html> 

@@ -1,10 +1,11 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from werkzeug.utils import secure_filename
 import os
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.secret_key = 'your-secret-key'
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
@@ -26,7 +27,8 @@ def register():
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-        return redirect(url_for('index'))
+        session['username'] = username
+        return redirect(url_for('messenger'))
     
     return render_template('register.html')
 
@@ -36,9 +38,16 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
 
-        return redirect(url_for('index'))
+        session['username'] = username
+        return redirect(url_for('messenger'))
     
     return render_template('login.html')
+
+@app.route('/messenger')
+def messenger():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('messenger.html', username=session['username'])
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)

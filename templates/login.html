@@ -1,29 +1,147 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HEXA - Вход</title>
+    <title>login in</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+        }
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .login-title {
+            color: #00ff00;
+            font-size: 8em;
+            margin-bottom: 0.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+        }
+        .sid-row {
+            display: flex;
+            gap: 2em;
+            justify-content: center;
+            margin-bottom: 0.3em;
+        }
+        .sid-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        .sid-label {
+            color: #00ff00;
+            font-size: 1.1em;
+            margin-bottom: 0.3em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+        }
+        .sid-input {
+            width: 220px;
+            max-width: 90vw;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: 1.1em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            padding: 0.5em 1em;
+            margin: 0.2em auto 0.3em auto;
+            display: block;
+            box-sizing: border-box;
+            outline: none;
+            text-align: left;
+        }
+        .login-btn {
+            width: 400px;
+            max-width: 90vw;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: 1.3em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            padding: 0.5em 1em;
+            margin: 0.3em auto 0 auto;
+            display: block;
+            box-sizing: border-box;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+        }
+        .login-btn:hover {
+            background: #00ff00;
+            color: #000;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1 class="title">Вход</h1>
+    <div class="login-container">
+        <div class="login-title">login in</div>
         <form class="form" action="{{ url_for('login') }}" method="POST">
-            <div class="form-group">
-                <input type="text" name="username" class="form-input nav-item" data-index="0" placeholder="Username" required>
+            <div class="sid-row">
+                <div class="sid-col">
+                    <label class="sid-label" for="sid1">SID1</label>
+                    <input type="password" id="sid1" name="sid1" class="sid-input" required>
+                </div>
+                <div class="sid-col">
+                    <label class="sid-label" for="sid3">SID3</label>
+                    <input type="password" id="sid3" name="sid3" class="sid-input" required>
+                </div>
             </div>
-            <div class="form-group">
-                <input type="password" name="password" class="form-input nav-item" data-index="1" placeholder="SID фраза" required>
+            <div class="sid-row">
+                <div class="sid-col">
+                    <label class="sid-label" for="sid2">SID2</label>
+                    <input type="password" id="sid2" name="sid2" class="sid-input" required>
+                </div>
+                <div class="sid-col">
+                    <label class="sid-label" for="sid4">SID4</label>
+                    <input type="password" id="sid4" name="sid4" class="sid-input" required>
+                </div>
             </div>
-            <div class="form-group">
-                <button type="submit" class="menu-item nav-item" data-index="2">Войти</button>
-            </div>
+            <button type="submit" class="login-btn">[login]</button>
         </form>
-        <div class="back-link">
-            <a href="{{ url_for('index') }}" class="menu-item nav-item" data-index="3">Назад</a>
-        </div>
     </div>
-    <script src="{{ url_for('static', filename='form-navigation.js') }}"></script>
+    <script>
+        // Навигация по полям с помощью стрелок
+        const fields = [
+            document.getElementById('sid1'),
+            document.getElementById('sid2'),
+            document.getElementById('sid3'),
+            document.getElementById('sid4')
+        ];
+        let currentField = 0;
+        fields[currentField].focus();
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                currentField = (currentField + 1) % fields.length;
+                fields[currentField].focus();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                currentField = (currentField - 1 + fields.length) % fields.length;
+                fields[currentField].focus();
+            }
+        });
+        // После успешного входа переход на /messenger
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this)
+            }).then(resp => {
+                if (resp.redirected) {
+                    window.location.href = resp.url;
+                } else {
+                    window.location.href = '/messenger';
+                }
+            });
+        });
+    </script>
 </body>
 </html> 
