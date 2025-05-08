@@ -1,0 +1,428 @@
+@font-face {
+    font-family: 'PixelFont';
+    src: url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+}
+
+@font-face {
+    font-family: 'Qager';
+    src: url('../Qager-zrlmw.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+body, .title, .menu-item, .form-input, .file-label, .chat-name, .last-message, .username, .search-input, .send-button, .message-input, .chat-title, .back-link, label, input, button, h1, h2, h3, h4, h5, h6, span, div {
+    font-family: 'Qager', 'Press Start 2P', cursive !important;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    font-family: 'Press Start 2P', cursive;
+    color: #00ff00;
+    cursor: none;
+}
+
+.container {
+    text-align: center;
+    padding: 2em;
+    width: 100%;
+}
+
+.title {
+    font-size: 12em;
+    margin-bottom: 0.5em;
+    text-shadow: 0 0 15px #00ff00;
+    font-family: 'Press Start 2P', cursive;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    width: 100%;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.menu-form {
+    margin: 0;
+    padding: 0;
+}
+
+.menu-item {
+    background: transparent;
+    border: 4px solid #00ff00;
+    color: #00ff00;
+    padding: 1.2em 4em;
+    font-family: 'Qager', 'Press Start 2P', cursive;
+    font-size: 1.6em;
+    cursor: none;
+    transition: all 0.3s ease;
+    width: auto;
+    min-width: 320px;
+    max-width: 100vw;
+    text-decoration: none;
+    display: block;
+    box-sizing: border-box;
+    text-align: center;
+    margin: 0 auto;
+}
+
+.menu-item:hover, .menu-item.selected {
+    background-color: #00ff00;
+    color: black;
+    box-shadow: 0 0 20px #00ff00;
+}
+
+.menu-item:focus {
+    outline: none;
+}
+
+/* Стили для форм */
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5em;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.form-group {
+    text-align: left;
+    position: relative;
+}
+
+.form-group::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background-color: #00ff00;
+    opacity: 0;
+    box-shadow: 0 0 10px #00ff00;
+    transition: opacity 0.3s ease;
+}
+
+.form-group:hover::before {
+    opacity: 0.5;
+}
+
+.form-input {
+    width: 100%;
+    padding: 1em;
+    background: transparent;
+    border: 4px solid #00ff00;
+    color: #00ff00;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.4em;
+    box-sizing: border-box;
+    transition: all 0.3s ease;
+}
+
+.form-input:hover {
+    border-color: #00ff00;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+    background-color: rgba(0, 255, 0, 0.1);
+}
+
+.form-input:focus {
+    outline: none;
+    box-shadow: 0 0 20px #00ff00;
+    background-color: #00ff00;
+    color: black;
+}
+
+.file-label {
+    display: block;
+    padding: 1em;
+    border: 4px solid #00ff00;
+    color: #00ff00;
+    cursor: pointer;
+    text-align: center;
+    font-size: 1.2em;
+}
+
+.file-input {
+    display: none;
+}
+
+.back-link {
+    margin-top: 2em;
+    display: flex;
+    justify-content: center;
+}
+
+.back-link .menu-item {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+/* Placeholder стили */
+::placeholder {
+    color: #00ff00;
+    opacity: 0.5;
+}
+
+/* Убираем автозаполнение браузера */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+    -webkit-text-fill-color: #00ff00;
+    -webkit-box-shadow: 0 0 0px 1000px #000 inset;
+    transition: background-color 5000s ease-in-out 0s;
+}
+
+.nav-item.selected {
+    border-color: #00ff00;
+    box-shadow: 0 0 20px #00ff00;
+    background-color: rgba(0, 255, 0, 0.2);
+}
+
+/* Стили для мессенджера */
+.messenger-container {
+    display: flex;
+    height: 100vh;
+    background-color: black;
+    width: 100%;
+}
+
+.sidebar {
+    width: 400px;
+    background-color: rgba(0, 20, 0, 0.9);
+    border-right: 4px solid #00ff00;
+    display: flex;
+    flex-direction: column;
+    margin-left: 0;
+    box-shadow: 0 0 10px #00ff00;
+}
+
+.user-profile {
+    padding: 1em;
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    border-bottom: 4px solid #00ff00;
+    width: 100%;
+    box-sizing: border-box;
+    background: rgba(0, 40, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.2);
+}
+
+.user-avatar, .chat-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    border: 4px solid #00ff00;
+    object-fit: cover;
+    box-shadow: 0 0 10px #00ff00;
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.username {
+    color: #00ff00;
+    font-size: 1.4em;
+}
+
+.search-container {
+    padding: 1em;
+    border-bottom: 4px solid #00ff00;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.5em;
+    background: rgba(0, 20, 0, 0.8);
+    border: 4px solid #00ff00;
+    color: #00ff00;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2em;
+    box-sizing: border-box;
+    text-shadow: 0 0 5px #00ff00;
+}
+
+.search-input::placeholder {
+    color: rgba(0, 255, 0, 0.5);
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
+}
+
+.chats-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1em;
+}
+
+.chat-item {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    padding: 1em;
+    border: 4px solid #00ff00;
+    margin-bottom: 0.5em;
+    cursor: none;
+    width: 100%;
+    box-sizing: border-box;
+    background-color: rgba(0, 50, 0, 0.3);
+    text-shadow: 0 0 5px #00ff00;
+    position: relative;
+    overflow: hidden;
+}
+
+.chat-item::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #00ff00);
+    animation: scan 2s linear infinite;
+}
+
+@keyframes scan {
+    0% {
+        left: -100%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+.chat-item:hover {
+    background-color: rgba(0, 100, 0, 0.3);
+    border-color: #00ff00;
+    box-shadow: 0 0 15px rgba(0, 255, 0, 0.3);
+}
+
+.chat-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.chat-name {
+    color: #00ff00;
+    font-size: 1.4em;
+    margin-bottom: 0.2em;
+    text-shadow: 0 0 5px #00ff00;
+}
+
+.last-message {
+    color: rgba(0, 255, 0, 0.7);
+    font-size: 1.2em;
+    opacity: 0.8;
+}
+
+.chat-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: rgba(0, 0, 0, 0.9);
+    width: 100%;
+}
+
+.chat-header {
+    padding: 1em;
+    border-bottom: 4px solid #00ff00;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.chat-title {
+    color: #00ff00;
+    font-size: 1.6em;
+    margin: 0;
+    padding: 1em;
+}
+
+.messages-container {
+    flex: 1;
+    padding: 1em;
+    overflow-y: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.message-input-container {
+    padding: 1em;
+    display: flex;
+    gap: 1em;
+    border-top: 4px solid #00ff00;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.message-input {
+    flex: 1;
+    padding: 1em;
+    background: rgba(0, 20, 0, 0.8);
+    border: 4px solid #00ff00;
+    color: #00ff00;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2em;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.send-button {
+    padding: 1em 2em;
+    background: transparent;
+    border: 4px solid #00ff00;
+    color: #00ff00;
+    font-family: 'Press Start 2P', cursive;
+    font-size: 1.2em;
+    cursor: none;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.send-button:hover, .send-button.selected {
+    background-color: #00ff00;
+    color: black;
+}
+
+/* Стили для сообщений */
+.message {
+    margin-bottom: 1em;
+    padding: 0.5em;
+    border: 1px solid #00ff00;
+    max-width: 70%;
+}
+
+.message.sent {
+    margin-left: auto;
+    background-color: rgba(0, 255, 0, 0.1);
+}
+
+.message.received {
+    margin-right: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.message-text {
+    color: #00ff00;
+    font-size: 0.8em;
+    margin: 0;
+}
+
+.message-time {
+    color: #00ff00;
+    font-size: 0.6em;
+    opacity: 0.7;
+    text-align: right;
+    margin-top: 0.5em;
+} 

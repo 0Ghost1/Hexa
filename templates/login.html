@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>login in</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        @font-face {
+            font-family: 'Qager';
+            src: url('/static/Qager-zrlmw.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            overflow: hidden;
+            cursor: none; /* Скрываем курсор мыши */
+        }
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+        }
+        .login-title {
+            color: #00ff00;
+            font-size: 8em;
+            margin-bottom: 0.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+        }
+        .sid-row {
+            display: flex;
+            gap: 2em;
+            justify-content: center;
+            margin-bottom: 0.3em;
+        }
+        .sid-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        .sid-label {
+            color: #00ff00;
+            font-size: 1.1em;
+            margin-bottom: 0.3em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+        }
+        .sid-input {
+            width: 220px;
+            max-width: 90vw;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: 1.1em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            padding: 0.5em 1em;
+            margin: 0.2em auto 0.3em auto;
+            display: block;
+            box-sizing: border-box;
+            outline: none;
+            text-align: left;
+            pointer-events: none; /* Отключаем взаимодействие с мышью */
+        }
+        .login-btn {
+            width: 400px;
+            max-width: 90vw;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: 1.3em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            padding: 0.5em 1em;
+            margin: 0.3em auto 0 auto;
+            display: block;
+            box-sizing: border-box;
+            text-align: center;
+            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            transition: background 0.2s, color 0.2s;
+        }
+        .login-btn:hover, .login-btn:focus {
+            background: #00ff00;
+            color: #000;
+        }
+        
+        /* Матричный эффект */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        /* Подсказка по управлению */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            color: #00ff00;
+            font-size: 1.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+            z-index: 20;
+            text-shadow: 0 0 10px #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    <div class="login-container">
+        <div class="login-title">login in</div>
+        <form class="form" action="{{ url_for('login') }}" method="POST">
+            <div class="sid-row">
+                <div class="sid-col">
+                    <label class="sid-label" for="sid1">SID1</label>
+                    <input type="password" id="sid1" name="sid1" class="sid-input" required>
+                </div>
+                <div class="sid-col">
+                    <label class="sid-label" for="sid3">SID3</label>
+                    <input type="password" id="sid3" name="sid3" class="sid-input" required>
+                </div>
+            </div>
+            <div class="sid-row">
+                <div class="sid-col">
+                    <label class="sid-label" for="sid2">SID2</label>
+                    <input type="password" id="sid2" name="sid2" class="sid-input" required>
+                </div>
+                <div class="sid-col">
+                    <label class="sid-label" for="sid4">SID4</label>
+                    <input type="password" id="sid4" name="sid4" class="sid-input" required>
+                </div>
+            </div>
+            <button type="submit" class="login-btn" id="loginBtn">[login]</button>
+        </form>
+        <div class="keyboard-hint">NAVIGATE: [↑] [↓] [←] [→] | CONFIRM: [ENTER]</div>
+    </div>
+    <script>
+        // Блокируем клики мышью
+        document.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+        
+        // Навигация по полям с помощью стрелок
+        const fields = [
+            document.getElementById('sid1'),
+            document.getElementById('sid2'),
+            document.getElementById('sid3'),
+            document.getElementById('sid4'),
+            document.getElementById('loginBtn')
+        ];
+        let currentField = 0;
+        fields[currentField].focus();
+        
+        // Проверка на ввод только латинских символов
+        fields.forEach(field => {
+            if (field.type === 'password') {
+                field.addEventListener('input', function(e) {
+                    const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+                    if (!englishOnly.test(this.value)) {
+                        // Удаляем последний символ, если он не соответствует шаблону
+                        this.value = this.value.slice(0, -1);
+                    }
+                });
+            }
+        });
+        
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight') {
+                if (currentField === 0) currentField = 2;
+                else if (currentField === 2) currentField = 0;
+                else if (currentField === 1) currentField = 3;
+                else if (currentField === 3) currentField = 1;
+                else if (currentField === 4) currentField = 4;
+                fields[currentField].focus();
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                if (currentField === 0) currentField = 2;
+                else if (currentField === 2) currentField = 0;
+                else if (currentField === 1) currentField = 3;
+                else if (currentField === 3) currentField = 1;
+                else if (currentField === 4) currentField = 4;
+                fields[currentField].focus();
+                e.preventDefault();
+            } else if (e.key === 'ArrowDown') {
+                if (currentField < 2) currentField += 1;
+                else if (currentField === 2 || currentField === 3) currentField = 4;
+                fields[currentField].focus();
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp') {
+                if (currentField === 1 || currentField === 0) currentField = 4;
+                else if (currentField === 4) currentField = 2;
+                else if (currentField > 2) currentField -= 1;
+                fields[currentField].focus();
+                e.preventDefault();
+            } else if (e.key === 'Enter' && currentField === 4) {
+                // Отправляем форму
+                submitLoginForm();
+                e.preventDefault();
+            }
+        });
+        
+        // После успешного входа переход на /messenger
+        function submitLoginForm() {
+            const form = document.querySelector('form');
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            }).then(resp => {
+                if (resp.redirected) {
+                    window.location.href = resp.url;
+                } else {
+                    window.location.href = '/messenger';
+                }
+            });
+        }
+        
+        // Матричный эффект с пасхалками
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Устанавливаем размер канваса
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Пасхалки и символы для рендеринга (добавляем пасхалки, связанные со входом)
+        const eastereggs = [
+            "welcome to matrix", "find the rabbit", "follow the white rabbit", 
+            "wake up neo", "there is no spoon", "red or blue pill", 
+            "knock knock neo", "the matrix has you", "HEXA SYSTEM", 
+            "reality is a dream", "they are watching", "you are the one",
+            "system failure", "ctrl+alt+del", "blue screen", "root access",
+            "code injection", "sudo rm -rf", "hidden backdoor", "secret key",
+            "access granted", "login successful", "authentication required",
+            "incorrect password", "admin access", "user verified", "secure channel",
+            "morpheus is calling", "take the red pill", "glitch in the matrix",
+            "dodge this", "I know kung fu", "deja vu", "matrix reloaded", 
+            "source code", "agent smith", "zion", "system override",
+            "use keyboard only", "mouse disabled", "terminal mode", "command line",
+            "hexa protocol", "hexa network", "enter hexa", "hexa confirmed"
+        ];
+        
+        // Создаем массив капель
+        const columns = Math.floor(canvas.width / 20);
+        const drops = [];
+        
+        // Инициализация капель
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * -canvas.height);
+        }
+        
+        // Функция рисования
+        function draw() {
+            // Полупрозрачный черный фон для создания эффекта затухания
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = '15px Qager';
+            ctx.fillStyle = '#00ff00';
+            
+            // Перебираем все капли
+            for (let i = 0; i < drops.length; i++) {
+                // Генерируем случайный символ или часть пасхалки
+                let text = '';
+                if (Math.random() > 0.99) {
+                    // Получаем случайную пасхалку
+                    const eggIndex = Math.floor(Math.random() * eastereggs.length);
+                    const egg = eastereggs[eggIndex];
+                    
+                    // Получаем случайную букву из пасхалки
+                    const charIndex = Math.floor(Math.random() * egg.length);
+                    text = egg[charIndex];
+                } else {
+                    // Генерируем случайный символ (латинские буквы, цифры и специальные символы)
+                    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,./<>?';
+                    text = charset[Math.floor(Math.random() * charset.length)];
+                }
+                
+                // Нарисовать символ
+                ctx.fillText(text, i * 20, drops[i]);
+                
+                // Сбрасываем каплю обратно наверх после достижения нижней границы
+                if (drops[i] > canvas.height && Math.random() > 0.975) {
+                    drops[i] = Math.floor(Math.random() * -100);
+                }
+                
+                // Передвигаем каплю
+                drops[i] += Math.random() * 2 + 1;
+            }
+        }
+        
+        // Обработка изменения размера окна
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const newColumns = Math.floor(canvas.width / 20);
+            for (let i = 0; i < newColumns; i++) {
+                if (!drops[i]) {
+                    drops[i] = Math.floor(Math.random() * -canvas.height);
+                }
+            }
+        });
+        
+        // Запуск анимации
+        setInterval(draw, 50);
+    </script>
+</body>
+</html> 

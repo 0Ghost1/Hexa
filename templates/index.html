@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HEXA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        @font-face {
+            font-family: 'Qager';
+            src: url('/static/Qager-zrlmw.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #000;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            overflow: hidden;
+            cursor: none; /* Скрываем курсор мыши */
+        }
+        .main-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            z-index: 10;
+        }
+        .main-title {
+            color: #00ff00;
+            font-size: 10em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            margin-bottom: 1em;
+            text-align: center;
+            text-shadow: 0 0 40px #00ff00, 0 0 80px #00ff00, 0 0 120px #00ff00;
+        }
+        .main-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5em;
+            align-items: center;
+        }
+        .main-btn {
+            width: 500px;
+            max-width: 90vw;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: 2.5em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            padding: 0.7em 1em;
+            text-align: center;
+            margin: 0 auto;
+            display: block;
+            box-sizing: border-box;
+            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 20px #00ff00;
+        }
+        .main-btn:hover, .main-btn:focus {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 40px #00ff00, 0 0 80px #00ff00;
+            outline: none;
+        }
+        
+        /* Матричный эффект */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        /* Подсказка по управлению */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            color: #00ff00;
+            font-size: 1.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+            z-index: 20;
+            text-shadow: 0 0 10px #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    <div class="main-container">
+        <div class="main-title">HEXA</div>
+        <div class="main-menu">
+            <a href="{{ url_for('register') }}" class="main-btn" id="main-register">Register</a>
+            <a href="{{ url_for('login') }}" class="main-btn" id="main-login">Login</a>
+        </div>
+        <div class="keyboard-hint">NAVIGATE: [↑] [↓] | SELECT: [ENTER]</div>
+    </div>
+    <script>
+        // Блокируем клики мышью
+        document.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+        
+        // Навигация по кнопкам стрелками вверх/вниз
+        const mainBtns = [
+            document.getElementById('main-register'),
+            document.getElementById('main-login')
+        ];
+        let mainBtnIdx = 0;
+        mainBtns[mainBtnIdx].focus();
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowDown') {
+                mainBtnIdx = (mainBtnIdx + 1) % mainBtns.length;
+                mainBtns[mainBtnIdx].focus();
+                e.preventDefault();
+            } else if (e.key === 'ArrowUp') {
+                mainBtnIdx = (mainBtnIdx - 1 + mainBtns.length) % mainBtns.length;
+                mainBtns[mainBtnIdx].focus();
+                e.preventDefault();
+            } else if (e.key === 'Enter') {
+                window.location.href = mainBtns[mainBtnIdx].href;
+                e.preventDefault();
+            }
+        });
+        
+        // Матричный эффект с пасхалками
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Устанавливаем размер канваса
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Пасхалки и символы для рендеринга
+        const eastereggs = [
+            "welcome to matrix", "find the rabbit", "follow the white rabbit", 
+            "wake up neo", "there is no spoon", "red or blue pill", 
+            "knock knock neo", "the matrix has you", "HEXA SYSTEM", 
+            "reality is a dream", "they are watching", "you are the one",
+            "system failure", "ctrl+alt+del", "blue screen", "root access",
+            "code injection", "sudo rm -rf", "hidden backdoor", "secret key",
+            "morpheus is calling", "take the red pill", "glitch in the matrix",
+            "dodge this", "I know kung fu", "deja vu", "matrix reloaded", 
+            "source code", "agent smith", "zion", "system override",
+            "use keyboard only", "mouse disabled", "terminal mode", "command line",
+            "hexa protocol", "hexa network", "enter hexa", "hexa confirmed"
+        ];
+        
+        // Создаем массив капель
+        const columns = Math.floor(canvas.width / 20); // Ширина символов
+        const drops = [];
+        
+        // Инициализация капель
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * -canvas.height); // Начинаем выше верхней границы канваса
+        }
+        
+        // Функция рисования
+        function draw() {
+            // Полупрозрачный черный фон для создания эффекта затухания
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = '15px Qager';
+            ctx.fillStyle = '#00ff00';
+            
+            // Перебираем все капли
+            for (let i = 0; i < drops.length; i++) {
+                // Генерируем случайный символ или часть пасхалки
+                let text = '';
+                if (Math.random() > 0.99) {
+                    // Получаем случайную пасхалку
+                    const eggIndex = Math.floor(Math.random() * eastereggs.length);
+                    const egg = eastereggs[eggIndex];
+                    
+                    // Получаем случайную букву из пасхалки
+                    const charIndex = Math.floor(Math.random() * egg.length);
+                    text = egg[charIndex];
+                } else {
+                    // Генерируем случайный символ (латинские буквы, цифры и специальные символы)
+                    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,./<>?';
+                    text = charset[Math.floor(Math.random() * charset.length)];
+                }
+                
+                // Нарисовать символ
+                ctx.fillText(text, i * 20, drops[i]);
+                
+                // Сбрасываем каплю обратно наверх после достижения нижней границы
+                if (drops[i] > canvas.height && Math.random() > 0.975) {
+                    drops[i] = Math.floor(Math.random() * -100);
+                }
+                
+                // Передвигаем каплю
+                drops[i] += Math.random() * 2 + 1; // Случайная скорость падения
+            }
+        }
+        
+        // Обработка изменения размера окна
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            // Пересчитываем количество колонок и капель
+            const newColumns = Math.floor(canvas.width / 20);
+            for (let i = 0; i < newColumns; i++) {
+                if (!drops[i]) {
+                    drops[i] = Math.floor(Math.random() * -canvas.height);
+                }
+            }
+        });
+        
+        // Запуск анимации
+        setInterval(draw, 50);
+    </script>
+</body>
+</html> 

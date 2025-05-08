@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>register to</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        @font-face {
+            font-family: 'Qager';
+            src: url('/static/Qager-zrlmw.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            cursor: none; /* Скрываем курсор мыши */
+        }
+        .screen {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+        }
+        .reg-title {
+            color: #00ff00;
+            font-size: 8em;
+            margin-bottom: 0.3em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+        }
+        .reg-label {
+            color: #00ff00;
+            font-size: 1.3em;
+            margin-bottom: 1.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+        }
+        .reg-input, .reg-btn {
+            width: 400px;
+            max-width: 90vw;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: 1.3em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            padding: 0.5em 1em;
+            margin: 0.3em auto;
+            display: block;
+            box-sizing: border-box;
+            outline: none;
+            text-align: left;
+            pointer-events: none; /* Отключаем взаимодействие с мышью */
+        }
+        .reg-btn {
+            text-align: center;
+            background: transparent;
+            transition: background 0.2s, color 0.2s;
+        }
+        .reg-btn:hover, .reg-btn:focus {
+            background: #00ff00;
+            color: #000;
+        }
+        .avatar-box {
+            width: 120px;
+            height: 120px;
+            border: 4px solid #00ff00;
+            margin: 0.2em auto 0.7em auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.5);
+            border-radius: 0;
+            overflow: hidden;
+            pointer-events: none; /* Отключаем взаимодействие с мышью */
+        }
+        .avatar-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .reg-btn[disabled] {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+        .sid-row {
+            display: flex;
+            gap: 2em;
+            justify-content: center;
+            margin-bottom: 1.2em;
+        }
+        .sid-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        .sid-label {
+            color: #00ff00;
+            font-size: 1.1em;
+            margin-bottom: 0.3em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+        }
+        .sid-input {
+            width: 220px;
+            max-width: 90vw;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: 1.1em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            padding: 0.5em 1em;
+            margin: 0.3em auto 1em auto;
+            display: block;
+            box-sizing: border-box;
+            outline: none;
+            text-align: left;
+            pointer-events: none; /* Отключаем взаимодействие с мышью */
+        }
+        .sid-num {
+            color: #00ff00;
+            font-size: 1.1em;
+            margin-bottom: 0.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+        }
+        .sid-desc {
+            color: #00ff00;
+            font-size: 1.1em;
+            margin-bottom: 1.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+        }
+        .reg-btn-square {
+            width: 400px;
+            max-width: 90vw;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: 1.3em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            padding: 0.5em 1em;
+            margin: 0.3em auto 0 auto;
+            display: block;
+            box-sizing: border-box;
+            text-align: center;
+            background: transparent;
+            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            transition: background 0.2s, color 0.2s;
+        }
+        .reg-btn-square:hover, .reg-btn-square:focus {
+            background: #00ff00;
+            color: #000;
+        }
+        .reg-upload-label {
+            color: #00ff00;
+            font-size: 1.1em;
+            margin-bottom: 0.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+        }
+        .file-input { display: none; }
+        .reg-btn-square.selected,
+        .reg-btn-square:focus {
+            background: #00ff00;
+            color: #000;
+            outline: none;
+        }
+        
+        /* Матричный эффект */
+        canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        /* Подсказка по управлению */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            color: #00ff00;
+            font-size: 1.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+            z-index: 2000;
+            text-shadow: 0 0 10px #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrixCanvas"></canvas>
+    <form id="registerForm" action="{{ url_for('register') }}" method="POST" enctype="multipart/form-data">
+        <!-- Шаг 1 -->
+        <div class="screen" id="regStep1">
+            <div class="reg-title">register to</div>
+            <div class="reg-upload-label">[1] upload</div>
+            <label class="avatar-box">
+                <img id="avatarImg" src="{{ url_for('static', filename='uploads/default-avatar.png') }}" alt="Avatar">
+                <input type="file" name="avatar" class="file-input" accept="image/*" onchange="previewAvatar(event)">
+            </label>
+            <input type="text" name="username" class="reg-input" placeholder="@username" required>
+            <button type="button" class="reg-btn-square" id="step1NextBtn">[next]</button>
+            <div class="keyboard-hint">NAVIGATE: [↑] [↓] | SELECT: [ENTER]</div>
+        </div>
+        <!-- Шаг 2 -->
+        <div class="screen" id="regStep2" style="display:none;">
+            <div class="reg-title">register to</div>
+            <div class="reg-label">give me your fullname</div>
+            <input type="text" name="name" class="reg-input" placeholder="name" required>
+            <input type="text" name="surname" class="reg-input" placeholder="surname">
+            <button type="button" class="reg-btn-square" id="step2BackBtn">[back]</button>
+            <button type="button" class="reg-btn-square" id="step2NextBtn">[next]</button>
+            <div class="keyboard-hint">NAVIGATE: [↑] [↓] | SELECT: [ENTER]</div>
+        </div>
+        <!-- Шаг 3 -->
+        <div class="screen" id="regStep3" style="display:none;">
+            <div class="reg-title">register to</div>
+            <div class="sid-desc">these SID phrases will be used for authentication. Please remember or write them down somewhere.</div>
+            <div class="sid-row">
+                <div class="sid-col">
+                    <div class="sid-num">1</div>
+                    <input type="text" name="sid1" class="sid-input" placeholder="bull" required>
+                </div>
+                <div class="sid-col">
+                    <div class="sid-num">3</div>
+                    <input type="text" name="sid3" class="sid-input" placeholder="question" required>
+                </div>
+            </div>
+            <div class="sid-row">
+                <div class="sid-col">
+                    <div class="sid-num">2</div>
+                    <input type="text" name="sid2" class="sid-input" placeholder="table" required>
+                </div>
+                <div class="sid-col">
+                    <div class="sid-num">4</div>
+                    <input type="text" name="sid4" class="sid-input" placeholder="glass" required>
+                </div>
+            </div>
+            <button type="button" class="reg-btn-square" id="step3BackBtn">[back]</button>
+            <button type="submit" class="reg-btn-square" id="registerBtn">[register]</button>
+            <div class="keyboard-hint">NAVIGATE: [↑] [↓] [←] [→] | SELECT: [ENTER]</div>
+        </div>
+    </form>
+    <script>
+        // Блокируем клики мышью
+        document.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
+        
+        function showStep(step) {
+            document.getElementById('regStep1').style.display = (step === 1) ? 'flex' : 'none';
+            document.getElementById('regStep2').style.display = (step === 2) ? 'flex' : 'none';
+            document.getElementById('regStep3').style.display = (step === 3) ? 'flex' : 'none';
+            window.currentStep = step;
+            
+            // Сбрасываем фокус при переключении этапов
+            if (step === 1) {
+                document.querySelector('#regStep1 .reg-input').focus();
+            } else if (step === 2) {
+                document.querySelector('#regStep2 .reg-input').focus();
+            } else if (step === 3) {
+                document.querySelector('#regStep3 input[name="sid1"]').focus();
+            }
+        }
+        
+        function previewAvatar(event) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                document.getElementById('avatarImg').src = e.target.result;
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+        
+        // Ограничиваем ввод только латинскими символами
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener('input', function(e) {
+                const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+                if (!englishOnly.test(this.value)) {
+                    // Удаляем последний символ, если он не соответствует шаблону
+                    this.value = this.value.slice(0, -1);
+                }
+            });
+        });
+        
+        // Навигация по стрелкам
+        window.currentStep = 1;
+        window.addEventListener('keydown', function(e) {
+            // Переключение этапов
+            if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                if (window.currentStep === 1) showStep(2);
+                else if (window.currentStep === 2) showStep(3);
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                if (window.currentStep === 2) showStep(1);
+                else if (window.currentStep === 3) showStep(2);
+            }
+            
+            // Перемещение по input и кнопкам стрелками вверх/вниз
+            if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Tab') {
+                let navElems = [];
+                if (window.currentStep === 1) {
+                    navElems = Array.from(document.querySelectorAll('#regStep1 input[type="text"], #regStep1 .reg-btn-square'));
+                } else if (window.currentStep === 2) {
+                    navElems = Array.from(document.querySelectorAll('#regStep2 input[type="text"], #regStep2 .reg-btn-square'));
+                } else if (window.currentStep === 3) {
+                    navElems = Array.from(document.querySelectorAll('#regStep3 input[type="text"], #regStep3 .reg-btn-square'));
+                }
+                
+                if (navElems.length > 0) {
+                    const active = document.activeElement;
+                    let idx = navElems.indexOf(active);
+                    if (idx === -1) idx = 0;
+                    
+                    if (e.key === 'ArrowDown' || (e.key === 'Tab' && !e.shiftKey)) {
+                        idx = (idx + 1) % navElems.length;
+                    } else if (e.key === 'ArrowUp' || (e.key === 'Tab' && e.shiftKey)) {
+                        idx = (idx - 1 + navElems.length) % navElems.length;
+                    }
+                    
+                    navElems[idx].focus();
+                    e.preventDefault();
+                }
+            }
+            
+            // Обработка Enter для кнопок
+            if (e.key === 'Enter') {
+                const active = document.activeElement;
+                
+                if (active.id === 'step1NextBtn') {
+                    showStep(2);
+                    e.preventDefault();
+                } else if (active.id === 'step2BackBtn') {
+                    showStep(1);
+                    e.preventDefault();
+                } else if (active.id === 'step2NextBtn') {
+                    showStep(3);
+                    e.preventDefault();
+                } else if (active.id === 'step3BackBtn') {
+                    showStep(2);
+                    e.preventDefault();
+                } else if (active.id === 'registerBtn') {
+                    submitRegisterForm();
+                    e.preventDefault();
+                }
+            }
+        });
+        
+        // Подсветка кнопок при фокусе
+        document.querySelectorAll('.reg-btn-square').forEach(btn => {
+            btn.addEventListener('focus', function() {
+                this.classList.add('selected');
+            });
+            btn.addEventListener('blur', function() {
+                this.classList.remove('selected');
+            });
+        });
+        
+        // После успешной регистрации переход на /messenger
+        function submitRegisterForm() {
+            const form = document.getElementById('registerForm');
+            // Можно добавить валидацию, если нужно
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            }).then(resp => {
+                if (resp.redirected) {
+                    window.location.href = resp.url;
+                } else {
+                    window.location.href = '/messenger';
+                }
+            });
+        }
+        
+        // Матричный эффект с пасхалками
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Устанавливаем размер канваса
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        
+        // Пасхалки и символы для рендеринга (пасхалки, связанные с регистрацией)
+        const eastereggs = [
+            "welcome to matrix", "find the rabbit", "follow the white rabbit", 
+            "wake up neo", "there is no spoon", "red or blue pill", 
+            "knock knock neo", "the matrix has you", "HEXA SYSTEM", 
+            "reality is a dream", "they are watching", "you are the one",
+            "system failure", "ctrl+alt+del", "blue screen", "root access",
+            "code injection", "sudo rm -rf", "hidden backdoor", "secret key",
+            "new user created", "identity confirmed", "biometric scan",
+            "facial recognition", "digital footprint", "data encryption",
+            "user registration", "accept terms", "create profile", "terminal access",
+            "morpheus is calling", "take the red pill", "glitch in the matrix",
+            "dodge this", "I know kung fu", "deja vu", "matrix reloaded", 
+            "source code", "agent smith", "zion", "system override",
+            "use keyboard only", "mouse disabled", "terminal mode", "command line",
+            "hexa protocol", "hexa network", "enter hexa", "hexa confirmed"
+        ];
+        
+        // Создаем массив капель
+        const columns = Math.floor(canvas.width / 20);
+        const drops = [];
+        
+        // Инициализация капель
+        for (let i = 0; i < columns; i++) {
+            drops[i] = Math.floor(Math.random() * -canvas.height);
+        }
+        
+        // Функция рисования
+        function draw() {
+            // Полупрозрачный черный фон для создания эффекта затухания
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            ctx.font = '15px Qager';
+            ctx.fillStyle = '#00ff00';
+            
+            // Перебираем все капли
+            for (let i = 0; i < drops.length; i++) {
+                // Генерируем случайный символ или часть пасхалки
+                let text = '';
+                if (Math.random() > 0.99) {
+                    // Получаем случайную пасхалку
+                    const eggIndex = Math.floor(Math.random() * eastereggs.length);
+                    const egg = eastereggs[eggIndex];
+                    
+                    // Получаем случайную букву из пасхалки
+                    const charIndex = Math.floor(Math.random() * egg.length);
+                    text = egg[charIndex];
+                } else {
+                    // Генерируем случайный символ (латинские буквы, цифры и специальные символы)
+                    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,./<>?';
+                    text = charset[Math.floor(Math.random() * charset.length)];
+                }
+                
+                // Нарисовать символ
+                ctx.fillText(text, i * 20, drops[i]);
+                
+                // Сбрасываем каплю обратно наверх после достижения нижней границы
+                if (drops[i] > canvas.height && Math.random() > 0.975) {
+                    drops[i] = Math.floor(Math.random() * -100);
+                }
+                
+                // Передвигаем каплю
+                drops[i] += Math.random() * 2 + 1;
+            }
+        }
+        
+        // Обработка изменения размера окна
+        window.addEventListener('resize', function() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const newColumns = Math.floor(canvas.width / 20);
+            for (let i = 0; i < newColumns; i++) {
+                if (!drops[i]) {
+                    drops[i] = Math.floor(Math.random() * -canvas.height);
+                }
+            }
+        });
+        
+        // Запуск анимации
+        setInterval(draw, 50);
+        
+        // Устанавливаем начальный фокус
+        document.querySelector('#regStep1 .reg-input').focus();
+    </script>
+</body>
+</html> 
