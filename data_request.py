@@ -19,7 +19,6 @@ def create_new_user(username, name, surname, sid1, sid2, sid3, sid4):
     db_sess = db_session.create_session()
     db_sess.add(user)
     db_sess.commit()
-    db_sess.close()
 
     return user.id
 

@@ -230,27 +230,7 @@
         <!-- Шаг 3 -->
         <div class="screen" id="regStep3" style="display:none;">
             <div class="reg-title">register to</div>
-            <div class="sid-desc">these SID phrases will be used for authentication. Please remember or write them down somewhere.</div>
-            <div class="sid-row">
-                <div class="sid-col">
-                    <div class="sid-num">1</div>
-                    <input type="text" name="sid1" class="sid-input" value="{{ sid1 }}" required readonly>
-                </div>
-                <div class="sid-col">
-                    <div class="sid-num">3</div>
-                    <input type="text" name="sid3" class="sid-input" value="{{ sid3 }}" required readonly>
-                </div>
-            </div>
-            <div class="sid-row">
-                <div class="sid-col">
-                    <div class="sid-num">2</div>
-                    <input type="text" name="sid2" class="sid-input" value="{{ sid2 }}" required readonly>
-                </div>
-                <div class="sid-col">
-                    <div class="sid-num">4</div>
-                    <input type="text" name="sid4" class="sid-input" value="{{ sid4 }}" required readonly>
-                </div>
-            </div>
+            <div class="reg-label">press [register] to complete</div>
             <button type="button" class="reg-btn-square" id="step3BackBtn">[back]</button>
             <button type="submit" class="reg-btn-square" id="registerBtn">[register]</button>
             <div class="keyboard-hint">NAVIGATE: [↑] [↓] [←] [→] | SELECT: [ENTER]</div>
@@ -276,7 +256,7 @@
             } else if (step === 2) {
                 document.querySelector('#regStep2 .reg-input').focus();
             } else if (step === 3) {
-                document.querySelector('#regStep3 input[name="sid1"]').focus();
+                document.getElementById('registerBtn').focus();
             }
         }
         
@@ -373,15 +353,29 @@
             });
         });
         
-        // После успешной регистрации переход на /messenger
+        // После успешной регистрации перенаправляем на страницу с SID
         function submitRegisterForm() {
             const form = document.getElementById('registerForm');
-            // Можно добавить валидацию, если нужно
             fetch(form.action, {
                 method: 'POST',
                 body: new FormData(form)
-            }).then(resp => {
-                if (resp.redirected) {
+            }).then(async resp => {
+                if (resp.ok) {
+                    // Ожидаем JSON с SID
+                    let data;
+                    try { data = await resp.json(); } catch { data = null; }
+                    if (data && data.sid1 && data.sid2 && data.sid3 && data.sid4) {
+                        // Перенаправляем на страницу с SID
+                        window.location.href = '/registersid?sid1=' + encodeURIComponent(data.sid1) + 
+                            '&sid2=' + encodeURIComponent(data.sid2) + 
+                            '&sid3=' + encodeURIComponent(data.sid3) + 
+                            '&sid4=' + encodeURIComponent(data.sid4);
+                    } else if (resp.redirected) {
+                        window.location.href = resp.url;
+                    } else {
+                        window.location.href = '/messenger';
+                    }
+                } else if (resp.redirected) {
                     window.location.href = resp.url;
                 } else {
                     window.location.href = '/messenger';
