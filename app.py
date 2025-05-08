@@ -1,11 +1,13 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from werkzeug.utils import secure_filename
 import os
-from random_word import RandomWords
+from other import generate_random_sid, hash_string_sha256
+from data_request import create_new_user, search_user_sid
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+app.config['MAX_CONTENT_LENGTH'] = (16 * 1024
+                                    * 1024)
 app.secret_key = 'your-secret-key'
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -17,40 +19,54 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form.get('username')
+        username = request.form.get('@username')
         name = request.form.get('name')
         surname = request.form.get('surname')
-        password = request.form.get('password')
-        
+
         if 'avatar' in request.files:
             file = request.files['avatar']
             if file.filename != '':
                 filename = secure_filename(file.filename)
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 
-        session['username'] = username
+        if username and name and surname:
+            sid_words = generate_random_sid()
+            new_user_id = create_new_user(username, name, surname, sid_words[0], sid_words[1], sid_words[2], sid_words[3])
+            session['id'] = username
+        else:
+            pass
+            #cursor олжен сдлеать анимку
+
+
         return redirect(url_for('messenger'))
-    
-    # Генерируем 4 случайных слова для SID
-    r = RandomWords()
-    sid_words = []
-    for _ in range(4):
-        word = None
-        # Иногда random-word может вернуть None, повторяем до получения слова
-        while not word:
-            word = r.get_random_word()
-        sid_words.append(word)
+
+    sid_words = generate_random_sid()
+
     return render_template('register.html', sid1=sid_words[0], sid2=sid_words[1], sid3=sid_words[2], sid4=sid_words[3])
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        hash_string_sha256()
+        sid1 = request.form.get('sid1')
+        sid2 = request.form.get('sid2')
+        sid3 = request.form.get('sid3')
+        sid4 = request.form.get('sid4')
+        if sid1 and sid2 and sid3 and sid4:
+            user_id = search_user_sid(hash_string_sha256(sid1), hash_string_sha256(sid2), hash_string_sha256(sid3), hash_string_sha256(sid4))
+            if user_id:
+                session['user_id'] = user_id
+                return redirect(url_for('messenger'))
+            else:
+                pass
+                #доделать
+        else:
+            pass
+            #Доделать
 
-        session['username'] = username
-        return redirect(url_for('messenger'))
-    
+
+
+
     return render_template('login.html')
 
 @app.route('/messenger')
