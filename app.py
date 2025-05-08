@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from werkzeug.utils import secure_filename
 import os
+from random_word import RandomWords
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -30,7 +31,16 @@ def register():
         session['username'] = username
         return redirect(url_for('messenger'))
     
-    return render_template('register.html')
+    # Генерируем 4 случайных слова для SID
+    r = RandomWords()
+    sid_words = []
+    for _ in range(4):
+        word = None
+        # Иногда random-word может вернуть None, повторяем до получения слова
+        while not word:
+            word = r.get_random_word()
+        sid_words.append(word)
+    return render_template('register.html', sid1=sid_words[0], sid2=sid_words[1], sid3=sid_words[2], sid4=sid_words[3])
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
