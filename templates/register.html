@@ -17,10 +17,10 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;
             background: #000;
             font-family: 'Qager', 'Press Start 2P', cursive !important;
-            cursor: none; /* Скрываем курсор мыши */
+            overflow: hidden;
+            cursor: default; /* Changed from: cursor: none; */
         }
         .screen {
             position: fixed;
@@ -62,12 +62,15 @@
             box-sizing: border-box;
             outline: none;
             text-align: left;
-            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            cursor: text;
+            pointer-events: auto;
         }
         .reg-btn {
             text-align: center;
             background: transparent;
             transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+            pointer-events: auto;
         }
         .reg-btn:hover, .reg-btn:focus {
             background: #00ff00;
@@ -86,6 +89,8 @@
             justify-content: center;
             transition: box-shadow 0.3s ease;
             background-color: #000000;
+            cursor: pointer;
+            pointer-events: auto;
         }
         
         .avatar-box.focused {
@@ -143,7 +148,8 @@
             box-sizing: border-box;
             outline: none;
             text-align: left;
-            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            cursor: text;
+            pointer-events: auto;
         }
         .sid-num {
             color: #00ff00;
@@ -171,7 +177,8 @@
             box-sizing: border-box;
             text-align: center;
             background: transparent;
-            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            cursor: pointer;
+            pointer-events: auto;
             transition: background 0.2s, color 0.2s;
         }
         .reg-btn-square:hover, .reg-btn-square:focus {
@@ -225,6 +232,9 @@
         
         #avatarImg {
             display: none;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
         
         #avatarImg.has-image {
@@ -272,17 +282,21 @@
     </form>
     <script src="{{ url_for('static', filename='matrix-animations.js') }}"></script>
     <script>
-        // Блокируем клики мышью
+        // Remove the click blocker
+        /*
         document.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             return false;
         }, true);
+        */
         
         function setupEventHandlers() {
-            // Блокируем клики мышью
+            // Remove the click blocker
+            /*
             document.removeEventListener('click', clickBlocker, true);
             document.addEventListener('click', clickBlocker, true);
+            */
             
             // Проверка на ввод только латинских символов
             document.querySelectorAll('input[type="text"]').forEach(input => {
@@ -313,6 +327,31 @@
                 });
             });
             
+            // Add click handlers to buttons to mimic Enter key
+            document.getElementById('step1NextBtn').addEventListener('click', function() {
+                showStep(2);
+            });
+            
+            document.getElementById('step2BackBtn').addEventListener('click', function() {
+                showStep(1);
+            });
+            
+            document.getElementById('step2NextBtn').addEventListener('click', function() {
+                showStep(3);
+            });
+            
+            document.getElementById('step3BackBtn').addEventListener('click', function() {
+                showStep(2);
+            });
+            
+            document.getElementById('registerBtn').addEventListener('click', function() {
+                submitRegisterForm();
+            });
+            
+            document.getElementById('avatarSelector').addEventListener('click', function() {
+                openFileDialog();
+            });
+            
             // Фокус на avatarSelector после выбора файла
             document.getElementById('avatarInput').addEventListener('change', function() {
                 // После выбора файла возвращаем фокус на элемент avatarSelector
@@ -333,11 +372,25 @@
             document.addEventListener('keydown', keydownHandler);
         }
         
-        // Функция блокировки кликов
+        // Функция блокировки кликов - change to allow clicks
         function clickBlocker(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
+            // Check if the clicked element is interactive
+            const target = e.target;
+            const isInteractive = target.tagName === 'INPUT' || 
+                                target.tagName === 'BUTTON' || 
+                                target.tagName === 'A' || 
+                                target.id === 'avatarSelector' ||
+                                target.closest('#avatarSelector') ||
+                                target.classList.contains('reg-btn-square') ||
+                                target.classList.contains('avatar-box');
+            
+            if (!isInteractive) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            return true;
         }
         
         // Обработчик клавиш
@@ -424,6 +477,14 @@
             // Сбрасываем фокус при переключении этапов
             if (step === 1) {
                 document.querySelector('#regStep1 .reg-input').focus();
+                
+                // Check if we need to display the avatar icon
+                const avatarImg = document.getElementById('avatarImg');
+                const avatarIcon = document.querySelector('.avatar-icon');
+                
+                if (!avatarImg.classList.contains('has-image') && avatarIcon) {
+                    avatarIcon.style.display = 'block';
+                }
             } else if (step === 2) {
                 document.querySelector('#regStep2 .reg-input').focus();
             } else if (step === 3) {
@@ -437,26 +498,28 @@
                 const avatarImg = document.getElementById('avatarImg');
                 avatarImg.src = e.target.result;
                 avatarImg.classList.add('has-image');
+                
+                // Hide the avatar icon when image is uploaded
+                const avatarIcon = document.querySelector('.avatar-icon');
+                if (avatarIcon) {
+                    avatarIcon.style.display = 'none';
+                }
             };
             reader.readAsDataURL(event.target.files[0]);
         }
         
         // Открытие диалога выбора файла
         function openFileDialog() {
-            // Создаем новое событие клика
-            const evt = new MouseEvent('click', {
-                bubbles: true,
-                cancelable: true,
-                view: window
-            });
             // Отменяем стандартное блокирование клика
             document.removeEventListener('click', clickBlocker, true);
             // Отправляем событие клика на input файла
-            document.getElementById('avatarInput').dispatchEvent(evt);
+            document.getElementById('avatarInput').click();
             // Возвращаем блокирование через небольшую задержку
+            /*
             setTimeout(() => {
                 document.addEventListener('click', clickBlocker, true);
             }, 100);
+            */
         }
         
         // После успешной регистрации перенаправляем на страницу с SID

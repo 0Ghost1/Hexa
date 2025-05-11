@@ -2,11 +2,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const menuItems = document.querySelectorAll('.menu-item');
     let currentIndex = 0;
 
-    // Скрываем курсор мыши
-    document.body.style.cursor = 'none';
-
     // Инициализация первого выбранного элемента
     menuItems[currentIndex].classList.add('selected');
+    
+    // Add mouse interaction support
+    menuItems.forEach((item, index) => {
+        // Highlight on hover
+        item.addEventListener('mouseenter', () => {
+            menuItems[currentIndex].classList.remove('selected');
+            item.classList.add('selected');
+            currentIndex = index;
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            if (currentIndex !== index) {
+                item.classList.remove('selected');
+            }
+        });
+    });
 
     document.addEventListener('keydown', (e) => {
         switch(e.key) {

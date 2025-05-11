@@ -1,8 +1,8 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from werkzeug.utils import secure_filename
 import os
-from other import generate_random_sid, hash_string_sha256
-from data_request import create_new_user, search_user_sid, check_username, get_username_by_id, get_user_by_id, update_user_profile
+from other import generate_random_sid, hash_string_sha256, save_avatar, rename_file, check_file_name
+from data_request import create_new_user, search_user_sid, check_username, get_user_by_id, update_user_profile, get_username
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -27,19 +27,8 @@ def register():
         username = request.form.get('username')
         name = request.form.get('name')
         surname = request.form.get('surname')
-        avatar_filename = None
+        filename = None
 
-        if 'avatar' in request.files:
-            file = request.files['avatar']
-            if file.filename != '':
-                # Создаем безопасное имя файла
-                avatar_filename = secure_filename(file.filename)
-                # Создаем уникальное имя файла, добавляя метку времени
-                filename_parts = os.path.splitext(avatar_filename)
-                import time
-                avatar_filename = f"{filename_parts[0]}_{int(time.time())}{filename_parts[1]}"
-                # Сохраняем файл в папку аватаров
-                file.save(os.path.join(app.config['AVATAR_FOLDER'], avatar_filename))
 
         if not username or not name or not surname:
             error_message = "ERROR: All fields are required"
@@ -51,15 +40,16 @@ def register():
             print(error_message)
             return render_template('register.html', error_message=error_message), 400
 
+        if 'avatar' in request.files:
+            file = request.files['avatar']
+            if file.filename:
+                filename = save_avatar(file, username)
+
         sid_words = generate_random_sid()
-        # Создаем полный путь к аватару для сохранения в БД
-        avatar_path = None
-        if avatar_filename:
-            avatar_path = f"static/avatar/{avatar_filename}"
 
         new_user_id = create_new_user(username, name, surname, hash_string_sha256(sid_words[0]),
                                       hash_string_sha256(sid_words[1]), hash_string_sha256(sid_words[2]),
-                                      hash_string_sha256(sid_words[3]), avatar_path)
+                                      hash_string_sha256(sid_words[3]), filename)
         print(sid_words)
         print(new_user_id)
         # Устанавливаем ID пользователя в сессию
@@ -104,19 +94,17 @@ def messenger():
     # Проверяем наличие user_id в сессии
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
+
     # Получаем данные пользователя по user_id
     user = get_user_by_id(session['user_id'])
-    
+
     if not user:
         # Если пользователь не найден, сбрасываем сессию
         session.clear()
         return redirect(url_for('login'))
-    
-    # Определяем путь к аватару
-    avatar = user.avatar_link.split('/')[-1] if user.avatar_link else 'default-avatar.png'
-    
-    return render_template('messenger.html', username=user.username, name=user.name, avatar=avatar)
+
+    avatar = f"{user.username}.png" if check_file_name(f"{user.username}.png") else "person.png"
+    return render_template('messenger.html', username=user.username, name=user.name, surname=user.surname, avatar=avatar)
 
 
 @app.route('/show_sid/<sid1>/<sid2>/<sid3>/<sid4>')
@@ -124,16 +112,11 @@ def show_sid(sid1, sid2, sid3, sid4):
     return render_template('sidsee.html', sid1=sid1, sid2=sid2, sid3=sid3, sid4=sid4)
 
 
-def display_sid_phrases(sid1, sid2, sid3, sid4):
-    return render_template('sidsee.html', sid1=sid1, sid2=sid2, sid3=sid3, sid4=sid4)
 
 
 @app.route('/set_session', methods=['POST'])
 def set_session():
-    """
-    Устанавливает ID пользователя в сессию.
-    Используется для установки сессии после отображения SID фраз.
-    """
+
     data = request.get_json()
     if data and 'user_id' in data:
         session['user_id'] = int(data['user_id'])
@@ -143,39 +126,33 @@ def set_session():
 
 @app.route('/update_profile', methods=['POST'])
 def update_profile():
-    """
-    Обрабатывает запрос на обновление профиля пользователя
-    """
+
     if 'user_id' not in session:
         return jsonify(success=False, error="Not authenticated"), 401
-    
+
     user_id = session['user_id']
     username = request.form.get('username')
     name = request.form.get('name')
+    surname = request.form.get('surname')
     avatar_link = None
-    
-    # Обработка загрузки аватара
+
+
     if 'avatar' in request.files:
         file = request.files['avatar']
         if file and file.filename:
-            # Создаем безопасное имя файла
-            avatar_filename = secure_filename(file.filename)
-            # Создаем уникальное имя файла, добавляя метку времени
-            filename_parts = os.path.splitext(avatar_filename)
-            import time
-            avatar_filename = f"{filename_parts[0]}_{int(time.time())}{filename_parts[1]}"
-            # Полный путь для сохранения в БД
-            avatar_link = f"static/avatar/{avatar_filename}"
-            # Сохраняем файл
-            file.save(os.path.join(app.config['AVATAR_FOLDER'], avatar_filename))
-    
-    # Обновляем профиль пользователя
-    success = update_user_profile(user_id, username, name, avatar_link)
-    
-    if success:
+            old_username = get_username(user_id)
+            avatar_link = save_avatar(file, old_username)
+
+
+
+    update = update_user_profile(user_id, username, name, surname, avatar_link)
+
+    if update:
         return jsonify(success=True), 200
     else:
         return jsonify(success=False, error="Failed to update profile"), 400
+
+
 
 
 if __name__ == '__main__':

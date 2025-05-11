@@ -17,10 +17,10 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;
             background: #000;
             font-family: 'Qager', 'Press Start 2P', cursive !important;
-            cursor: none; /* Скрываем курсор мыши */
+            overflow: hidden;
+            cursor: default; /* Changed from: cursor: none; */
         }
         .screen {
             position: fixed;
@@ -62,12 +62,15 @@
             box-sizing: border-box;
             outline: none;
             text-align: left;
-            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            cursor: text;
+            pointer-events: auto;
         }
         .reg-btn {
             text-align: center;
             background: transparent;
             transition: background 0.2s, color 0.2s;
+            cursor: pointer;
+            pointer-events: auto;
         }
         .reg-btn:hover, .reg-btn:focus {
             background: #00ff00;
@@ -84,7 +87,8 @@
             background: rgba(0,0,0,0.5);
             border-radius: 0;
             overflow: hidden;
-            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            cursor: text;
+            pointer-events: auto;
         }
         .avatar-box img {
             width: 100%;
@@ -127,7 +131,8 @@
             box-sizing: border-box;
             outline: none;
             text-align: left;
-            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            cursor: text;
+            pointer-events: auto;
         }
         .sid-num {
             color: #00ff00;
@@ -155,7 +160,8 @@
             box-sizing: border-box;
             text-align: center;
             background: transparent;
-            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            cursor: pointer;
+            pointer-events: auto;
             transition: background 0.2s, color 0.2s;
         }
         .reg-btn-square:hover, .reg-btn-square:focus {
@@ -257,12 +263,14 @@
         </div>
     </form>
     <script>
-        // Блокируем клики мышью
+        // Remove click blocker
+        /*
         document.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             return false;
         }, true);
+        */
 
         function showStep(step) {
             document.getElementById('regStep1').style.display = (step === 1) ? 'flex' : 'none';
@@ -279,6 +287,41 @@
                 document.querySelector('#regStep3 input[name="sid1"]').focus();
             }
         }
+
+        // Add click handlers for all navigation buttons
+        document.addEventListener('DOMContentLoaded', function() {
+            // Step 1 buttons
+            document.getElementById('step1NextBtn').addEventListener('click', function() {
+                showStep(2);
+            });
+            
+            // Step 2 buttons
+            document.getElementById('step2BackBtn').addEventListener('click', function() {
+                showStep(1);
+            });
+            
+            document.getElementById('step2NextBtn').addEventListener('click', function() {
+                showStep(3);
+            });
+            
+            // Step 3 buttons
+            document.getElementById('step3BackBtn').addEventListener('click', function() {
+                showStep(2);
+            });
+            
+            document.getElementById('registerBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                submitRegisterForm();
+            });
+            
+            // Avatar upload click handler
+            const avatarBox = document.querySelector('.avatar-box');
+            if (avatarBox) {
+                avatarBox.addEventListener('click', function() {
+                    document.getElementById('avatarInput').click();
+                });
+            }
+        });
 
         function previewAvatar(event) {
             const reader = new FileReader();

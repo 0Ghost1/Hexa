@@ -30,14 +30,14 @@ document.addEventListener('DOMContentLoaded', () => {
         "Initializing ", "Loading ", "Running ", "Executing ", "Starting ",
         "System ", "Process ", "Module ", "Function ", "Class ", 
         "Error in ", "Warning: ", "Success: ", "Debug: ", "Info: ",
-        "Access ", "User ", "Connection ", "Network ", "File "
+        "Access ", "User ", "Connection ", "Network ", "File ", "010101000101010", "101010101010010"
     ];
     
     const suffixes = [
         " module", " process", " sequence", " protocol", " function",
         " class", " method", " routine", " system", " algorithm",
         " loaded", " started", " connected", " active", " online",
-        " complete", " found", " verified", " authorized", " detected"
+        " complete", " found", " verified", " authorized", " detected", "is god..", "000000010"
     ];
     
     // Settings for the terminal lines

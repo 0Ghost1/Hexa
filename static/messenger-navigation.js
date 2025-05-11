@@ -4,14 +4,60 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSection = 'sidebar'; // sidebar или chat
     let chatIndex = 0; // Индекс для элементов чата
 
-    // Скрываем курсор мыши
-    document.body.style.cursor = 'none';
-
     // Инициализация первого выбранного элемента
     navItems[currentIndex].classList.add('selected');
 
     // Получение элементов чата
     const chatItems = document.querySelectorAll('.chat-area .nav-item');
+
+    // Add mouse interaction for navigation items
+    navItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            if (currentSection === 'sidebar') {
+                navItems[currentIndex].classList.remove('selected');
+                currentIndex = index;
+                item.classList.add('selected');
+                
+                if (item.classList.contains('chat-item')) {
+                    // Update chat title
+                    document.querySelector('.chat-title').textContent = 
+                        item.querySelector('.chat-name').textContent;
+                }
+            }
+        });
+        
+        // Highlight on hover
+        item.addEventListener('mouseenter', () => {
+            if (currentSection === 'sidebar') {
+                navItems[currentIndex].classList.remove('selected');
+                item.classList.add('selected');
+            }
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            if (currentSection === 'sidebar' && currentIndex !== index) {
+                item.classList.remove('selected');
+                navItems[currentIndex].classList.add('selected');
+            }
+        });
+    });
+    
+    // Add mouse interaction for chat items
+    chatItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            if (currentSection === 'chat') {
+                chatItems[chatIndex].classList.remove('selected');
+                chatIndex = index;
+                item.classList.add('selected');
+                
+                if (item.classList.contains('message-input')) {
+                    item.focus();
+                } else if (item.classList.contains('send-button')) {
+                    // Send message logic (already implemented in the click handler)
+                }
+            }
+        });
+    });
 
     document.addEventListener('keydown', (e) => {
         switch(e.key) {

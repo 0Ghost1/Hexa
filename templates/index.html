@@ -20,7 +20,7 @@
             background: #000;
             font-family: 'Qager', 'Press Start 2P', cursive !important;
             overflow: hidden;
-            cursor: none; /* Скрываем курсор мыши */
+            cursor: default; /* Changed from: cursor: none; */
         }
         .main-container {
             min-height: 100vh;
@@ -61,6 +61,7 @@
             pointer-events: none; /* Отключаем взаимодействие с мышью */
             transition: background 0.2s, color 0.2s, box-shadow 0.2s;
             box-shadow: 0 0 20px #00ff00;
+            cursor: pointer;
         }
         .main-btn:hover, .main-btn:focus {
             background: #00ff00;
@@ -82,6 +83,9 @@
             z-index: 20;
             text-shadow: 0 0 10px #00ff00;
         }
+        .menu-item {
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -97,12 +101,14 @@
     <!-- Используем matrix-rain.js для главной страницы -->
     <script src="{{ url_for('static', filename='matrix-rain.js') }}"></script>
     <script>
-        // Блокируем клики мышью
+        // Remove click blocker
+        /*
         document.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             return false;
         }, true);
+        */
         
         // Навигация по кнопкам стрелками вверх/вниз
         const mainBtns = [
@@ -111,6 +117,14 @@
         ];
         let mainBtnIdx = 0;
         mainBtns[mainBtnIdx].focus();
+        
+        // Add direct click handlers to buttons
+        mainBtns.forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                window.location.href = this.href;
+            });
+        });
+        
         document.addEventListener('keydown', function(e) {
             if (e.key === 'ArrowDown') {
                 mainBtnIdx = (mainBtnIdx + 1) % mainBtns.length;

@@ -1,4 +1,5 @@
 from data import db_session
+from other import rename_file
 from data.user import User
 
 def startDB():
@@ -41,9 +42,7 @@ def check_username(username):
 
 
 def get_username_by_id(user_id):
-    """
-    Возвращает имя пользователя по его ID
-    """
+
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == user_id).first()
     if user:
@@ -52,36 +51,45 @@ def get_username_by_id(user_id):
 
 
 def get_user_by_id(user_id):
-    """
-    Возвращает объект пользователя по его ID
-    """
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == user_id).first()
     return user
 
 
-def update_user_profile(user_id, username=None, name=None, avatar_link=None):
-    """
-    Обновляет профиль пользователя
-    """
+def update_user_profile(user_id, username=None, name=None, surname=None, avatar_link=None):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.id == user_id).first()
-    
+
     if not user:
         return False
-    
-    if username and username != user.username:
-        # Проверяем, не занят ли новый username
-        existing_user = db_sess.query(User).filter(User.username == username).first()
-        if existing_user and existing_user.id != user_id:
+
+    if username:
+        search_user = db_sess.query(User).filter(User.username == username).first()
+        if search_user and search_user.id != user_id:
             return False
+        rename_file(avatar_link, f"static/avatar/{username}.png")
         user.username = username
-    
+
     if name:
         user.name = name
-    
+
+    if surname:
+        user.surname = surname
+
     if avatar_link:
         user.avatar_link = avatar_link
-    
+
+
+
     db_sess.commit()
     return True
+
+
+def get_username(user_id):
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == user_id).first()
+    return user.username
+
+
+
+

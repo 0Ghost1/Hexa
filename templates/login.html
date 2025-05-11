@@ -20,7 +20,7 @@
             background: #000;
             font-family: 'Qager', 'Press Start 2P', cursive !important;
             overflow: hidden;
-            cursor: none; /* Скрываем курсор мыши */
+            cursor: default; /* Changed from: cursor: none; */
         }
         .login-container {
             min-height: 100vh;
@@ -70,7 +70,8 @@
             box-sizing: border-box;
             outline: none;
             text-align: left;
-            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            cursor: text; /* Enable mouse interaction */
+            pointer-events: auto; /* Enable mouse interaction */
         }
         .login-btn {
             width: 400px;
@@ -85,7 +86,8 @@
             display: block;
             box-sizing: border-box;
             text-align: center;
-            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            cursor: pointer; /* Enable mouse interaction */
+            pointer-events: auto; /* Enable mouse interaction */
             transition: background 0.2s, color 0.2s;
         }
         .login-btn:hover, .login-btn:focus {
@@ -221,45 +223,64 @@
         
         // Функция настройки обработчиков событий
         function setupEventHandlers() {
-            // Блокируем клики мышью
+            // Remove click blocker
+            /*
             document.removeEventListener('click', clickBlocker, true);
             document.addEventListener('click', clickBlocker, true);
+            */
             
             // Обновляем ссылки на поля ввода
-        const fields = [
-            document.getElementById('sid1'),
-            document.getElementById('sid2'),
-            document.getElementById('sid3'),
-            document.getElementById('sid4'),
-            document.getElementById('loginBtn')
-        ];
-        let currentField = 0;
-        fields[currentField].focus();
-        
-        // Проверка на ввод только латинских символов
-        fields.forEach(field => {
+            const fields = [
+                document.getElementById('sid1'),
+                document.getElementById('sid2'),
+                document.getElementById('sid3'),
+                document.getElementById('sid4'),
+                document.getElementById('loginBtn')
+            ];
+            let currentField = 0;
+            fields[currentField].focus();
+            
+            // Проверка на ввод только латинских символов
+            fields.forEach(field => {
                 if (field && field.type === 'password') {
-                field.addEventListener('input', function(e) {
-                    const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
-                    if (!englishOnly.test(this.value)) {
-                        // Удаляем последний символ, если он не соответствует шаблону
-                        this.value = this.value.slice(0, -1);
-                    }
-                });
-            }
-        });
-        
+                    field.addEventListener('input', function(e) {
+                        const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+                        if (!englishOnly.test(this.value)) {
+                            // Удаляем последний символ, если он не соответствует шаблону
+                            this.value = this.value.slice(0, -1);
+                        }
+                    });
+                }
+            });
+            
+            // Add click handler for login button
+            document.getElementById('loginBtn').addEventListener('click', function(e) {
+                e.preventDefault();
+                submitLoginForm();
+            });
+            
             // Удаляем предыдущий обработчик keydown, если он есть
             document.removeEventListener('keydown', keydownHandler);
             // Добавляем обработчик keydown
             document.addEventListener('keydown', keydownHandler);
         }
         
-        // Функция блокировки кликов для сохранения ссылки
+        // Функция блокировки кликов для сохранения ссылки - change to allow clicks on interactive elements
         function clickBlocker(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
+            // Check if the clicked element is interactive
+            const target = e.target;
+            const isInteractive = target.tagName === 'INPUT' || 
+                                target.tagName === 'BUTTON' || 
+                                target.classList.contains('login-btn') ||
+                                target.closest('.login-btn');
+            
+            if (!isInteractive) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            
+            return true;
         }
         
         // Обработчик нажатия клавиш

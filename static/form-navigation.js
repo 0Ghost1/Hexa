@@ -2,11 +2,39 @@ document.addEventListener('DOMContentLoaded', () => {
     const navItems = document.querySelectorAll('.nav-item');
     let currentIndex = 0;
 
-    // Скрываем курсор мыши
-    document.body.style.cursor = 'none';
-
     // Инициализация первого выбранного элемента
     navItems[currentIndex].classList.add('selected');
+
+    // Add mouse interaction support
+    navItems.forEach((item, index) => {
+        // Add click handling for form elements
+        item.addEventListener('click', () => {
+            navItems[currentIndex].classList.remove('selected');
+            currentIndex = index;
+            item.classList.add('selected');
+            
+            if (item.classList.contains('file-label')) {
+                // If it's a file label, click the hidden file input
+                item.querySelector('input[type="file"]').click();
+            } else if (item.tagName === 'INPUT') {
+                // If it's an input field, focus on it
+                item.focus();
+            }
+        });
+        
+        // Highlight on hover
+        item.addEventListener('mouseenter', () => {
+            navItems[currentIndex].classList.remove('selected');
+            item.classList.add('selected');
+        });
+        
+        item.addEventListener('mouseleave', () => {
+            if (currentIndex !== index) {
+                item.classList.remove('selected');
+                navItems[currentIndex].classList.add('selected');
+            }
+        });
+    });
 
     document.addEventListener('keydown', (e) => {
         switch(e.key) {

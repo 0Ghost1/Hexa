@@ -24,7 +24,7 @@ body {
     min-height: 100vh;
     font-family: 'Press Start 2P', cursive;
     color: #00ff00;
-    cursor: none;
+    cursor: default;
 }
 
 .container {
@@ -61,7 +61,7 @@ body {
     padding: 1.2em 4em;
     font-family: 'Qager', 'Press Start 2P', cursive;
     font-size: 1.6em;
-    cursor: none;
+    cursor: pointer;
     transition: all 0.3s ease;
     width: auto;
     min-width: 320px;
@@ -388,7 +388,7 @@ input:-webkit-autofill:focus {
     color: #00ff00;
     font-family: 'Press Start 2P', cursive;
     font-size: 1.2em;
-    cursor: none;
+    cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
 }
@@ -428,4 +428,16 @@ input:-webkit-autofill:focus {
     opacity: 0.7;
     text-align: right;
     margin-top: 0.5em;
+}
+
+input[type="text"], input[type="password"], input[type="email"], textarea, select {
+    cursor: text;
+}
+
+a, button, .menu-item, .chat-item, .send-button, .file-label, .user-profile {
+    cursor: pointer !important;
+}
+
+.messages-container, .sidebar, body, .container, .form-group, label, .chat-title, h1, h2, h3, h4, h5, h6 {
+    cursor: default;
 } 

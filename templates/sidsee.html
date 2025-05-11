@@ -17,10 +17,10 @@
             height: 100%;
             margin: 0;
             padding: 0;
-            overflow: hidden;
             background: #000;
             font-family: 'Qager', 'Press Start 2P', cursive !important;
-            cursor: none; /* Скрываем курсор мыши */
+            overflow: hidden;
+            cursor: default; /* Changed from: cursor: none; */
         }
         
         .container {
@@ -115,7 +115,7 @@
             pointer-events: auto; /* Делаем кнопку кликабельной */
             transition: background 0.2s, color 0.2s;
             text-decoration: none; /* Убираем подчеркивание для ссылки */
-            cursor: none; /* Скрываем курсор на кнопке */
+            cursor: pointer; /* Changed from: cursor: none; */
         }
         
         .btn:hover, .btn:focus {
@@ -180,7 +180,8 @@
 
     <script src="{{ url_for('static', filename='matrix-rain.js') }}"></script>
     <script>
-        // Блокируем клики мышью - но оставляем кнопку кликабельной
+        // Remove click blocker - allow clicking the continue button
+        /*
         document.addEventListener('click', function(e) {
             // Проверяем, является ли цель кнопкой [continue]
             if (e.target.id !== 'continueBtn' && !e.target.closest('#continueBtn')) {
@@ -189,12 +190,18 @@
                 return false;
             }
         }, true);
+        */
         
         // Навигационные элементы
         const navElements = [
             document.getElementById('continueBtn')
         ];
         let currentIndex = 0;
+        
+        // Добавляем обработчик клика для кнопки continue
+        document.getElementById('continueBtn').addEventListener('click', function(e) {
+            window.location.href = this.href;
+        });
         
         // Обработка навигации с клавиатуры
         document.addEventListener('keydown', function(e) {
