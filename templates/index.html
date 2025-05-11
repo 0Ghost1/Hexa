@@ -69,16 +69,6 @@
             outline: none;
         }
         
-        /* Матричный эффект */
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
         /* Подсказка по управлению */
         .keyboard-hint {
             position: fixed;
@@ -95,15 +85,17 @@
     </style>
 </head>
 <body>
-    <canvas id="matrixCanvas"></canvas>
     <div class="main-container">
-        <div class="main-title">HEXA</div>
+        <div class="main-title" data-glitch>HEXA</div>
         <div class="main-menu">
             <a href="{{ url_for('register') }}" class="main-btn" id="main-register">Register</a>
             <a href="{{ url_for('login') }}" class="main-btn" id="main-login">Login</a>
         </div>
         <div class="keyboard-hint">NAVIGATE: [↑] [↓] | SELECT: [ENTER]</div>
     </div>
+    
+    <!-- Используем matrix-rain.js для главной страницы -->
+    <script src="{{ url_for('static', filename='matrix-rain.js') }}"></script>
     <script>
         // Блокируем клики мышью
         document.addEventListener('click', function(e) {
@@ -133,94 +125,6 @@
                 e.preventDefault();
             }
         });
-        
-        // Матричный эффект с пасхалками
-        const canvas = document.getElementById('matrixCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Устанавливаем размер канваса
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        // Пасхалки и символы для рендеринга
-        const eastereggs = [
-            "welcome to matrix", "find the rabbit", "follow the white rabbit", 
-            "wake up neo", "there is no spoon", "red or blue pill", 
-            "knock knock neo", "the matrix has you", "HEXA SYSTEM", 
-            "reality is a dream", "they are watching", "you are the one",
-            "system failure", "ctrl+alt+del", "blue screen", "root access",
-            "code injection", "sudo rm -rf", "hidden backdoor", "secret key",
-            "morpheus is calling", "take the red pill", "glitch in the matrix",
-            "dodge this", "I know kung fu", "deja vu", "matrix reloaded", 
-            "source code", "agent smith", "zion", "system override",
-            "use keyboard only", "mouse disabled", "terminal mode", "command line",
-            "hexa protocol", "hexa network", "enter hexa", "hexa confirmed"
-        ];
-        
-        // Создаем массив капель
-        const columns = Math.floor(canvas.width / 20); // Ширина символов
-        const drops = [];
-        
-        // Инициализация капель
-        for (let i = 0; i < columns; i++) {
-            drops[i] = Math.floor(Math.random() * -canvas.height); // Начинаем выше верхней границы канваса
-        }
-        
-        // Функция рисования
-        function draw() {
-            // Полупрозрачный черный фон для создания эффекта затухания
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.font = '15px Qager';
-            ctx.fillStyle = '#00ff00';
-            
-            // Перебираем все капли
-            for (let i = 0; i < drops.length; i++) {
-                // Генерируем случайный символ или часть пасхалки
-                let text = '';
-                if (Math.random() > 0.99) {
-                    // Получаем случайную пасхалку
-                    const eggIndex = Math.floor(Math.random() * eastereggs.length);
-                    const egg = eastereggs[eggIndex];
-                    
-                    // Получаем случайную букву из пасхалки
-                    const charIndex = Math.floor(Math.random() * egg.length);
-                    text = egg[charIndex];
-                } else {
-                    // Генерируем случайный символ (латинские буквы, цифры и специальные символы)
-                    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,./<>?';
-                    text = charset[Math.floor(Math.random() * charset.length)];
-                }
-                
-                // Нарисовать символ
-                ctx.fillText(text, i * 20, drops[i]);
-                
-                // Сбрасываем каплю обратно наверх после достижения нижней границы
-                if (drops[i] > canvas.height && Math.random() > 0.975) {
-                    drops[i] = Math.floor(Math.random() * -100);
-                }
-                
-                // Передвигаем каплю
-                drops[i] += Math.random() * 2 + 1; // Случайная скорость падения
-            }
-        }
-        
-        // Обработка изменения размера окна
-        window.addEventListener('resize', function() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            // Пересчитываем количество колонок и капель
-            const newColumns = Math.floor(canvas.width / 20);
-            for (let i = 0; i < newColumns; i++) {
-                if (!drops[i]) {
-                    drops[i] = Math.floor(Math.random() * -canvas.height);
-                }
-            }
-        });
-        
-        // Запуск анимации
-        setInterval(draw, 50);
     </script>
 </body>
 </html> 

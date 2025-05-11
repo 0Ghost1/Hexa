@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your SID Phrases</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        @font-face {
+            font-family: 'Qager';
+            src: url('/static/Qager-zrlmw.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: #000;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            cursor: none; /* Скрываем курсор мыши */
+        }
+        
+        .container {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+        }
+        
+        .title {
+            color: #00ff00;
+            font-size: 8em;
+            margin-bottom: 0.3em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+        }
+        
+        .description {
+            color: #00ff00;
+            font-size: 1.3em;
+            margin-bottom: 1.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+            max-width: 800px;
+            padding: 0 20px;
+        }
+        
+        .sid-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 2em;
+        }
+        
+        .sid-row {
+            display: flex;
+            gap: 2em;
+            justify-content: center;
+            margin-bottom: 1.2em;
+        }
+        
+        .sid-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .sid-num {
+            color: #00ff00;
+            font-size: 1.1em;
+            margin-bottom: 0.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+        }
+        
+        .sid-box {
+            width: 220px;
+            max-width: 90vw;
+            background: transparent;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: 1.1em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            padding: 0.5em 1em;
+            margin: 0.3em auto 1em auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        
+        .btn {
+            width: 400px;
+            max-width: 90vw;
+            border: 4px solid #00ff00;
+            color: #00ff00;
+            font-size: 1.3em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            padding: 0.5em 1em;
+            margin: 0.3em auto 0 auto;
+            display: block;
+            box-sizing: border-box;
+            text-align: center;
+            background: transparent;
+            pointer-events: auto; /* Делаем кнопку кликабельной */
+            transition: background 0.2s, color 0.2s;
+            text-decoration: none; /* Убираем подчеркивание для ссылки */
+            cursor: none; /* Скрываем курсор на кнопке */
+        }
+        
+        .btn:hover, .btn:focus {
+            background: #00ff00;
+            color: #000;
+            outline: none;
+            box-shadow: 0 0 30px #00ff00;
+        }
+        
+        .btn.selected, .btn:focus {
+            background: #00ff00;
+            color: #000;
+            outline: none;
+        }
+
+        /* Подсказка по управлению */
+        .keyboard-hint {
+            position: fixed;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            color: #00ff00;
+            font-size: 1.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+            z-index: 20;
+            text-shadow: 0 0 10px #00ff00;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="title" data-glitch>register end</div>
+        <div class="description" data-glitch>THESE SID PHRASES WILL BE USED FOR AUTHENTICATION. PLEASE REMEMBER OR WRITE THEM DOWN.</div>
+        
+        <div class="sid-container">
+            <div class="sid-row">
+                <div class="sid-col">
+                    <div class="sid-num">SID-1</div>
+                    <div class="sid-box">{{ sid1 }}</div>
+                </div>
+                <div class="sid-col">
+                    <div class="sid-num">SID-3</div>
+                    <div class="sid-box">{{ sid3 }}</div>
+                </div>
+            </div>
+            <div class="sid-row">
+                <div class="sid-col">
+                    <div class="sid-num">SID-2</div>
+                    <div class="sid-box">{{ sid2 }}</div>
+                </div>
+                <div class="sid-col">
+                    <div class="sid-num">SID-4</div>
+                    <div class="sid-box">{{ sid4 }}</div>
+                </div>
+            </div>
+        </div>
+        
+        <a href="{{ url_for('messenger') }}" class="btn" id="continueBtn" tabindex="0">[continue]</a>
+        <div class="keyboard-hint">NAVIGATE: [←] [→] [↑] [↓] | SELECT: [ENTER]</div>
+    </div>
+
+    <script src="{{ url_for('static', filename='matrix-rain.js') }}"></script>
+    <script>
+        // Блокируем клики мышью - но оставляем кнопку кликабельной
+        document.addEventListener('click', function(e) {
+            // Проверяем, является ли цель кнопкой [continue]
+            if (e.target.id !== 'continueBtn' && !e.target.closest('#continueBtn')) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, true);
+        
+        // Навигационные элементы
+        const navElements = [
+            document.getElementById('continueBtn')
+        ];
+        let currentIndex = 0;
+        
+        // Обработка навигации с клавиатуры
+        document.addEventListener('keydown', function(e) {
+            // Стрелки не меняют фокус, так как у нас только одна кнопка
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                e.preventDefault();
+                navElements[currentIndex].focus();
+            }
+            
+            // Переход по нажатию Enter
+            if (e.key === 'Enter') {
+                window.location.href = document.getElementById('continueBtn').href;
+                e.preventDefault();
+            }
+        });
+        
+        // Фокус на кнопку продолжения при загрузке
+        window.addEventListener('load', function() {
+            navElements[currentIndex].focus();
+        });
+        
+        // Фокус на кнопку, если страница уже загружена
+        document.getElementById('continueBtn').focus();
+    </script>
+</body>
+</html> 

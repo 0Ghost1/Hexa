@@ -93,16 +93,6 @@
             color: #000;
         }
         
-        /* Матричный эффект */
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
         /* Подсказка по управлению */
         .keyboard-hint {
             position: fixed;
@@ -116,12 +106,30 @@
             z-index: 20;
             text-shadow: 0 0 10px #00ff00;
         }
+        
+        /* Стиль для сообщений об ошибках */
+        .error-message {
+            color: #ff0000;
+            font-size: 1.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            margin-bottom: 1em;
+            text-align: center;
+            text-shadow: 0 0 10px #ff0000;
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
     </style>
 </head>
 <body>
-    <canvas id="matrixCanvas"></canvas>
     <div class="login-container">
-        <div class="login-title">login in</div>
+        <div class="login-title" data-glitch>login in</div>
+        {% if error_message %}
+        <div class="error-message" data-glitch>{{ error_message }}</div>
+        {% endif %}
         <form class="form" action="{{ url_for('login') }}" method="POST">
             <div class="sid-row">
                 <div class="sid-col">
@@ -147,15 +155,77 @@
         </form>
         <div class="keyboard-hint">NAVIGATE: [↑] [↓] [←] [→] | CONFIRM: [ENTER]</div>
     </div>
+    <!-- Используем matrix-animations.js - ту же анимацию, что и в register -->
+    <script src="{{ url_for('static', filename='matrix-animations.js') }}"></script>
     <script>
-        // Блокируем клики мышью
-        document.addEventListener('click', function(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }, true);
+        // Функция для запуска матричной анимации
+        function setupMatrixEffect() {
+            // Это обертка для запуска анимации после событий, таких как перезагрузка DOM
+            const script = document.createElement('script');
+            script.src = "{{ url_for('static', filename='matrix-animations.js') }}";
+            document.head.appendChild(script);
+        }
         
-        // Навигация по полям с помощью стрелок
+        // После успешного входа переход на /messenger
+        function submitLoginForm() {
+            const form = document.querySelector('form');
+            fetch(form.action, {
+                method: 'POST',
+                body: new FormData(form)
+            }).then(async resp => {
+                if (resp.redirected) {
+                    window.location.href = resp.url;
+                } else {
+                    // Проверяем, содержит ли ответ сообщение об ошибке
+                    const respText = await resp.text();
+                    if (respText.includes('error-message')) {
+                        // Сохраняем текущий canvas с анимацией, если он есть
+                        const canvas = document.getElementById('matrixCanvas');
+                        let oldCanvas = null;
+                        if (canvas) {
+                            oldCanvas = canvas.cloneNode(true);
+                        }
+                        
+                        // Обновляем содержимое страницы с ошибкой
+                        document.body.innerHTML = respText;
+                        
+                        // Если был canvas, восстанавливаем его в начало body
+                        if (oldCanvas) {
+                            document.body.insertBefore(oldCanvas, document.body.firstChild);
+                        }
+                        
+                        // Восстанавливаем обработчики событий
+                        setupEventHandlers();
+                        
+                        // Если canvas был удален, запускаем анимацию заново
+                        if (!document.getElementById('matrixCanvas')) {
+                            setupMatrixEffect();
+                        }
+                    } else {
+                        window.location.href = '/messenger';
+                    }
+                }
+            });
+        }
+        
+        // Функция для динамической загрузки скриптов
+        function loadScript(src) {
+            return new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = src;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // Функция настройки обработчиков событий
+        function setupEventHandlers() {
+            // Блокируем клики мышью
+            document.removeEventListener('click', clickBlocker, true);
+            document.addEventListener('click', clickBlocker, true);
+            
+            // Обновляем ссылки на поля ввода
         const fields = [
             document.getElementById('sid1'),
             document.getElementById('sid2'),
@@ -168,7 +238,7 @@
         
         // Проверка на ввод только латинских символов
         fields.forEach(field => {
-            if (field.type === 'password') {
+                if (field && field.type === 'password') {
                 field.addEventListener('input', function(e) {
                     const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
                     if (!englishOnly.test(this.value)) {
@@ -179,7 +249,31 @@
             }
         });
         
-        document.addEventListener('keydown', function(e) {
+            // Удаляем предыдущий обработчик keydown, если он есть
+            document.removeEventListener('keydown', keydownHandler);
+            // Добавляем обработчик keydown
+            document.addEventListener('keydown', keydownHandler);
+        }
+        
+        // Функция блокировки кликов для сохранения ссылки
+        function clickBlocker(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+        
+        // Обработчик нажатия клавиш
+        function keydownHandler(e) {
+            const fields = [
+                document.getElementById('sid1'),
+                document.getElementById('sid2'),
+                document.getElementById('sid3'),
+                document.getElementById('sid4'),
+                document.getElementById('loginBtn')
+            ];
+            let currentField = fields.indexOf(document.activeElement);
+            if (currentField === -1) currentField = 0;
+            
             if (e.key === 'ArrowRight') {
                 if (currentField === 0) currentField = 2;
                 else if (currentField === 2) currentField = 0;
@@ -212,111 +306,10 @@
                 submitLoginForm();
                 e.preventDefault();
             }
-        });
-        
-        // После успешного входа переход на /messenger
-        function submitLoginForm() {
-            const form = document.querySelector('form');
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form)
-            }).then(resp => {
-                if (resp.redirected) {
-                    window.location.href = resp.url;
-                } else {
-                    window.location.href = '/messenger';
-                }
-            });
         }
         
-        // Матричный эффект с пасхалками
-        const canvas = document.getElementById('matrixCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        // Устанавливаем размер канваса
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        
-        // Пасхалки и символы для рендеринга (добавляем пасхалки, связанные со входом)
-        const eastereggs = [
-            "welcome to matrix", "find the rabbit", "follow the white rabbit", 
-            "wake up neo", "there is no spoon", "red or blue pill", 
-            "knock knock neo", "the matrix has you", "HEXA SYSTEM", 
-            "reality is a dream", "they are watching", "you are the one",
-            "system failure", "ctrl+alt+del", "blue screen", "root access",
-            "code injection", "sudo rm -rf", "hidden backdoor", "secret key",
-            "access granted", "login successful", "authentication required",
-            "incorrect password", "admin access", "user verified", "secure channel",
-            "morpheus is calling", "take the red pill", "glitch in the matrix",
-            "dodge this", "I know kung fu", "deja vu", "matrix reloaded", 
-            "source code", "agent smith", "zion", "system override",
-            "use keyboard only", "mouse disabled", "terminal mode", "command line",
-            "hexa protocol", "hexa network", "enter hexa", "hexa confirmed"
-        ];
-        
-        // Создаем массив капель
-        const columns = Math.floor(canvas.width / 20);
-        const drops = [];
-        
-        // Инициализация капель
-        for (let i = 0; i < columns; i++) {
-            drops[i] = Math.floor(Math.random() * -canvas.height);
-        }
-        
-        // Функция рисования
-        function draw() {
-            // Полупрозрачный черный фон для создания эффекта затухания
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            ctx.font = '15px Qager';
-            ctx.fillStyle = '#00ff00';
-            
-            // Перебираем все капли
-            for (let i = 0; i < drops.length; i++) {
-                // Генерируем случайный символ или часть пасхалки
-                let text = '';
-                if (Math.random() > 0.99) {
-                    // Получаем случайную пасхалку
-                    const eggIndex = Math.floor(Math.random() * eastereggs.length);
-                    const egg = eastereggs[eggIndex];
-                    
-                    // Получаем случайную букву из пасхалки
-                    const charIndex = Math.floor(Math.random() * egg.length);
-                    text = egg[charIndex];
-                } else {
-                    // Генерируем случайный символ (латинские буквы, цифры и специальные символы)
-                    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+[]{}|;:,./<>?';
-                    text = charset[Math.floor(Math.random() * charset.length)];
-                }
-                
-                // Нарисовать символ
-                ctx.fillText(text, i * 20, drops[i]);
-                
-                // Сбрасываем каплю обратно наверх после достижения нижней границы
-                if (drops[i] > canvas.height && Math.random() > 0.975) {
-                    drops[i] = Math.floor(Math.random() * -100);
-                }
-                
-                // Передвигаем каплю
-                drops[i] += Math.random() * 2 + 1;
-            }
-        }
-        
-        // Обработка изменения размера окна
-        window.addEventListener('resize', function() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            const newColumns = Math.floor(canvas.width / 20);
-            for (let i = 0; i < newColumns; i++) {
-                if (!drops[i]) {
-                    drops[i] = Math.floor(Math.random() * -canvas.height);
-                }
-            }
-        });
-        
-        // Запуск анимации
-        setInterval(draw, 50);
+        // Запуск обработчиков при загрузке страницы
+        setupEventHandlers();
     </script>
 </body>
 </html> 

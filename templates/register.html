@@ -74,22 +74,38 @@
             color: #000;
         }
         .avatar-box {
-            width: 120px;
-            height: 120px;
-            border: 4px solid #00ff00;
-            margin: 0.2em auto 0.7em auto;
+            width: 100px;
+            height: 100px;
+            margin: 1em auto;
+            border: 3px solid #00ff00;
+            border-radius: 10%;
+            overflow: hidden;
+            position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
-            background: rgba(0,0,0,0.5);
-            border-radius: 0;
-            overflow: hidden;
-            pointer-events: none; /* Отключаем взаимодействие с мышью */
+            transition: box-shadow 0.3s ease;
+            background-color: #000000;
         }
+        
+        .avatar-box.focused {
+            box-shadow: 0 0 30px #00ff00;
+        }
+        
         .avatar-box img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+        .avatar-icon {
+            position: absolute;
+            width: 50px !important;
+            height: 50px !important;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.9;
+            z-index: 10;
         }
         .reg-btn[disabled] {
             opacity: 0.5;
@@ -177,16 +193,6 @@
             outline: none;
         }
         
-        /* Матричный эффект */
-        canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
-        
         /* Подсказка по управлению */
         .keyboard-hint {
             position: fixed;
@@ -197,8 +203,32 @@
             font-size: 1.2em;
             font-family: 'Qager', 'Press Start 2P', cursive !important;
             text-align: center;
-            z-index: 2000;
+            z-index: 20;
             text-shadow: 0 0 10px #00ff00;
+        }
+        
+        /* Стиль для сообщений об ошибках */
+        .error-message {
+            color: #ff0000;
+            font-size: 1.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            margin-bottom: 1em;
+            text-align: center;
+            text-shadow: 0 0 10px #ff0000;
+            animation: blink 1.5s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+        
+        #avatarImg {
+            display: none;
+        }
+        
+        #avatarImg.has-image {
+            display: block;
         }
     </style>
 </head>
@@ -207,15 +237,19 @@
     <form id="registerForm" action="{{ url_for('register') }}" method="POST" enctype="multipart/form-data">
         <!-- Шаг 1 -->
         <div class="screen" id="regStep1">
-            <div class="reg-title">register to</div>
+            <div class="reg-title" data-glitch>register to</div>
+            {% if error_message %}
+            <div class="error-message" data-glitch>{{ error_message }}</div>
+            {% endif %}
             <div class="reg-upload-label">[1] upload</div>
-            <label class="avatar-box">
+            <button type="button" class="avatar-box" tabindex="0" id="avatarSelector">
                 <img id="avatarImg" src="{{ url_for('static', filename='uploads/default-avatar.png') }}" alt="Avatar">
-                <input type="file" name="avatar" class="file-input" accept="image/*" onchange="previewAvatar(event)">
-            </label>
+                <img src="{{ url_for('static', filename='person.png') }}" alt="Upload Avatar" class="avatar-icon">
+            </button>
+            <input type="file" name="avatar" class="file-input" accept="image/*" id="avatarInput" onchange="previewAvatar(event)">
             <input type="text" name="username" class="reg-input" placeholder="@username" required>
             <button type="button" class="reg-btn-square" id="step1NextBtn">[next]</button>
-            <div class="keyboard-hint">NAVIGATE: [↑] [↓] | SELECT: [ENTER]</div>
+            <div class="keyboard-hint">NAVIGATE: [↓] [↑] | SELECT: [ENTER]</div>
         </div>
         <!-- Шаг 2 -->
         <div class="screen" id="regStep2" style="display:none;">
@@ -225,7 +259,7 @@
             <input type="text" name="surname" class="reg-input" placeholder="surname">
             <button type="button" class="reg-btn-square" id="step2BackBtn">[back]</button>
             <button type="button" class="reg-btn-square" id="step2NextBtn">[next]</button>
-            <div class="keyboard-hint">NAVIGATE: [↑] [↓] | SELECT: [ENTER]</div>
+            <div class="keyboard-hint">NAVIGATE: [↓] [↑] | SELECT: [ENTER]</div>
         </div>
         <!-- Шаг 3 -->
         <div class="screen" id="regStep3" style="display:none;">
@@ -233,9 +267,10 @@
             <div class="reg-label">press [register] to complete</div>
             <button type="button" class="reg-btn-square" id="step3BackBtn">[back]</button>
             <button type="submit" class="reg-btn-square" id="registerBtn">[register]</button>
-            <div class="keyboard-hint">NAVIGATE: [↑] [↓] [←] [→] | SELECT: [ENTER]</div>
+            <div class="keyboard-hint">NAVIGATE: [↓] [↑] | SELECT: [ENTER]</div>
         </div>
     </form>
+    <script src="{{ url_for('static', filename='matrix-animations.js') }}"></script>
     <script>
         // Блокируем клики мышью
         document.addEventListener('click', function(e) {
@@ -244,44 +279,69 @@
             return false;
         }, true);
         
-        function showStep(step) {
-            document.getElementById('regStep1').style.display = (step === 1) ? 'flex' : 'none';
-            document.getElementById('regStep2').style.display = (step === 2) ? 'flex' : 'none';
-            document.getElementById('regStep3').style.display = (step === 3) ? 'flex' : 'none';
-            window.currentStep = step;
+        function setupEventHandlers() {
+            // Блокируем клики мышью
+            document.removeEventListener('click', clickBlocker, true);
+            document.addEventListener('click', clickBlocker, true);
             
-            // Сбрасываем фокус при переключении этапов
-            if (step === 1) {
-                document.querySelector('#regStep1 .reg-input').focus();
-            } else if (step === 2) {
-                document.querySelector('#regStep2 .reg-input').focus();
-            } else if (step === 3) {
-                document.getElementById('registerBtn').focus();
-            }
-        }
-        
-        function previewAvatar(event) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('avatarImg').src = e.target.result;
-            };
-            reader.readAsDataURL(event.target.files[0]);
-        }
-        
-        // Ограничиваем ввод только латинскими символами
-        document.querySelectorAll('input[type="text"]').forEach(input => {
-            input.addEventListener('input', function(e) {
-                const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
-                if (!englishOnly.test(this.value)) {
-                    // Удаляем последний символ, если он не соответствует шаблону
-                    this.value = this.value.slice(0, -1);
-                }
+            // Проверка на ввод только латинских символов
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                input.addEventListener('input', function(e) {
+                    const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+                    if (!englishOnly.test(this.value)) {
+                        // Удаляем последний символ, если он не соответствует шаблону
+                        this.value = this.value.slice(0, -1);
+                    }
+                });
             });
-        });
         
-        // Навигация по стрелкам
-        window.currentStep = 1;
-        window.addEventListener('keydown', function(e) {
+            // Подсветка кнопок при фокусе
+            document.querySelectorAll('.reg-btn-square, #avatarSelector').forEach(element => {
+                element.addEventListener('focus', function() {
+                    if (this.classList.contains('reg-btn-square')) {
+                        this.classList.add('selected');
+                    } else if (this.id === 'avatarSelector') {
+                        this.classList.add('focused');
+                    }
+                });
+                element.addEventListener('blur', function() {
+                    if (this.classList.contains('reg-btn-square')) {
+                        this.classList.remove('selected');
+                    } else if (this.id === 'avatarSelector') {
+                        this.classList.remove('focused');
+                    }
+                });
+            });
+            
+            // Фокус на avatarSelector после выбора файла
+            document.getElementById('avatarInput').addEventListener('change', function() {
+                // После выбора файла возвращаем фокус на элемент avatarSelector
+                setTimeout(() => {
+                    document.getElementById('avatarSelector').focus();
+                }, 100);
+            });
+            
+            // Запускаем матричный эффект
+            setupMatrixEffect();
+            
+            // Устанавливаем начальный шаг и фокус
+            window.currentStep = 1;
+            document.querySelector('#regStep1 .reg-input').focus();
+            
+            // Устанавливаем обработчик клавиш
+            document.removeEventListener('keydown', keydownHandler);
+            document.addEventListener('keydown', keydownHandler);
+        }
+        
+        // Функция блокировки кликов
+        function clickBlocker(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+        
+        // Обработчик клавиш
+        function keydownHandler(e) {
             // Переключение этапов
             if (e.key === 'ArrowRight') {
                 e.preventDefault();
@@ -297,7 +357,7 @@
             if (e.key === 'ArrowDown' || e.key === 'ArrowUp' || e.key === 'Tab') {
                 let navElems = [];
                 if (window.currentStep === 1) {
-                    navElems = Array.from(document.querySelectorAll('#regStep1 input[type="text"], #regStep1 .reg-btn-square'));
+                    navElems = Array.from(document.querySelectorAll('#regStep1 #avatarSelector, #regStep1 input[type="text"], #regStep1 .reg-btn-square'));
                 } else if (window.currentStep === 2) {
                     navElems = Array.from(document.querySelectorAll('#regStep2 input[type="text"], #regStep2 .reg-btn-square'));
                 } else if (window.currentStep === 3) {
@@ -324,7 +384,10 @@
             if (e.key === 'Enter') {
                 const active = document.activeElement;
                 
-                if (active.id === 'step1NextBtn') {
+                if (active.id === 'avatarSelector') {
+                    openFileDialog();
+                    e.preventDefault();
+                } else if (active.id === 'step1NextBtn') {
                     showStep(2);
                     e.preventDefault();
                 } else if (active.id === 'step2BackBtn') {
@@ -341,17 +404,60 @@
                     e.preventDefault();
                 }
             }
-        });
         
-        // Подсветка кнопок при фокусе
-        document.querySelectorAll('.reg-btn-square').forEach(btn => {
-            btn.addEventListener('focus', function() {
-                this.classList.add('selected');
+            // Активация загрузки аватарки по клавише "1"
+            if (e.key === '1' && window.currentStep === 1) {
+                openFileDialog();
+                e.preventDefault();
+            }
+        }
+        
+        // Инициализация обработчиков событий
+        setupEventHandlers();
+        
+        function showStep(step) {
+            document.getElementById('regStep1').style.display = (step === 1) ? 'flex' : 'none';
+            document.getElementById('regStep2').style.display = (step === 2) ? 'flex' : 'none';
+            document.getElementById('regStep3').style.display = (step === 3) ? 'flex' : 'none';
+            window.currentStep = step;
+            
+            // Сбрасываем фокус при переключении этапов
+            if (step === 1) {
+                document.querySelector('#regStep1 .reg-input').focus();
+            } else if (step === 2) {
+                document.querySelector('#regStep2 .reg-input').focus();
+            } else if (step === 3) {
+                document.getElementById('registerBtn').focus();
+            }
+        }
+        
+        function previewAvatar(event) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const avatarImg = document.getElementById('avatarImg');
+                avatarImg.src = e.target.result;
+                avatarImg.classList.add('has-image');
+            };
+            reader.readAsDataURL(event.target.files[0]);
+        }
+        
+        // Открытие диалога выбора файла
+        function openFileDialog() {
+            // Создаем новое событие клика
+            const evt = new MouseEvent('click', {
+                bubbles: true,
+                cancelable: true,
+                view: window
             });
-            btn.addEventListener('blur', function() {
-                this.classList.remove('selected');
-            });
-        });
+            // Отменяем стандартное блокирование клика
+            document.removeEventListener('click', clickBlocker, true);
+            // Отправляем событие клика на input файла
+            document.getElementById('avatarInput').dispatchEvent(evt);
+            // Возвращаем блокирование через небольшую задержку
+            setTimeout(() => {
+                document.addEventListener('click', clickBlocker, true);
+            }, 100);
+        }
         
         // После успешной регистрации перенаправляем на страницу с SID
         function submitRegisterForm() {
@@ -361,9 +467,23 @@
                 body: new FormData(form)
             }).then(async resp => {
                 if (resp.ok) {
+                    // Проверяем, содержит ли ответ сообщение об ошибке
+                    const respText = await resp.text();
+                    if (respText.includes('error-message')) {
+                        // Если получили HTML с сообщением об ошибке, обновляем страницу
+                        document.body.innerHTML = respText;
+                        // Восстанавливаем обработчики событий
+                        setupEventHandlers();
+                    } else {
                     // Ожидаем JSON с SID
                     let data;
-                    try { data = await resp.json(); } catch { data = null; }
+                        try { 
+                            // Пробуем распарсить JSON, если он есть
+                            data = JSON.parse(respText); 
+                        } catch { 
+                            data = null; 
+                        }
+                        
                     if (data && data.sid1 && data.sid2 && data.sid3 && data.sid4) {
                         // Перенаправляем на страницу с SID
                         window.location.href = '/registersid?sid1=' + encodeURIComponent(data.sid1) + 
@@ -374,17 +494,30 @@
                         window.location.href = resp.url;
                     } else {
                         window.location.href = '/messenger';
+                        }
                     }
                 } else if (resp.redirected) {
                     window.location.href = resp.url;
                 } else {
+                    // Проверяем, содержит ли ответ сообщение об ошибке
+                    const respText = await resp.text();
+                    if (respText.includes('error-message')) {
+                        // Если получили HTML с сообщением об ошибке, обновляем страницу
+                        document.body.innerHTML = respText;
+                        // Восстанавливаем обработчики событий
+                        setupEventHandlers();
+                } else {
                     window.location.href = '/messenger';
+                    }
                 }
             });
         }
         
         // Матричный эффект с пасхалками
+        function setupMatrixEffect() {
         const canvas = document.getElementById('matrixCanvas');
+            if (!canvas) return;
+            
         const ctx = canvas.getContext('2d');
         
         // Устанавливаем размер канваса
@@ -472,9 +605,7 @@
         
         // Запуск анимации
         setInterval(draw, 50);
-        
-        // Устанавливаем начальный фокус
-        document.querySelector('#regStep1 .reg-input').focus();
+        }
     </script>
 </body>
 </html> 
