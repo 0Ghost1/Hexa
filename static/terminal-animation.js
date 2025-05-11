@@ -66,8 +66,8 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Drawing function
     function drawTerminal() {
-        // Clear canvas with semi-transparent black for trail effect
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.08)';
+        // Clear canvas with less transparent black for trail effect
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         // Loop through each line
@@ -169,8 +169,8 @@ document.addEventListener('DOMContentLoaded', () => {
         scanLine.style.width = '100%';
         scanLine.style.height = '5px';
         scanLine.style.backgroundColor = 'rgba(0, 255, 0, 0.1)'; // Dimmer line
-        scanLine.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.3)';
-        scanLine.style.zIndex = '999';
+        scanLine.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.2)';
+        scanLine.style.zIndex = '2';
         scanLine.style.pointerEvents = 'none';
         document.body.appendChild(scanLine);
         
@@ -195,12 +195,12 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.height = '100%';
         overlay.style.backgroundColor = 'transparent';
         overlay.style.pointerEvents = 'none';
-        overlay.style.zIndex = '998';
+        overlay.style.zIndex = '2';
         document.body.appendChild(overlay);
         
         setInterval(() => {
             if (Math.random() > 0.997) {
-                overlay.style.backgroundColor = 'rgba(0, 255, 0, 0.02)'; // Dimmer effect
+                overlay.style.backgroundColor = 'rgba(0, 255, 0, 0.01)';
                 setTimeout(() => {
                     overlay.style.backgroundColor = 'transparent';
                 }, 50 + Math.random() * 50);

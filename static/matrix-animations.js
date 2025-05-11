@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Drawing function
     function draw() {
         // Semi-transparent black background for fade effect
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.02)';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
         
         ctx.font = '15px Qager';
@@ -141,9 +141,9 @@ document.addEventListener('DOMContentLoaded', () => {
         scanLine.style.left = '0';
         scanLine.style.width = '100%';
         scanLine.style.height = '5px';
-        scanLine.style.backgroundColor = 'rgba(0, 255, 0, 0.2)';
-        scanLine.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.5)';
-        scanLine.style.zIndex = '999';
+        scanLine.style.backgroundColor = 'rgba(0, 255, 0, 0.1)';
+        scanLine.style.boxShadow = '0 0 10px rgba(0, 255, 0, 0.3)';
+        scanLine.style.zIndex = '2';
         scanLine.style.pointerEvents = 'none';
         document.body.appendChild(scanLine);
         
@@ -168,12 +168,12 @@ document.addEventListener('DOMContentLoaded', () => {
         overlay.style.height = '100%';
         overlay.style.backgroundColor = 'transparent';
         overlay.style.pointerEvents = 'none';
-        overlay.style.zIndex = '998';
+        overlay.style.zIndex = '2';
         document.body.appendChild(overlay);
         
         setInterval(() => {
             if (Math.random() > 0.995) {
-                overlay.style.backgroundColor = 'rgba(0, 255, 0, 0.03)';
+                overlay.style.backgroundColor = 'rgba(0, 255, 0, 0.01)';
                 setTimeout(() => {
                     overlay.style.backgroundColor = 'transparent';
                 }, 50 + Math.random() * 50);

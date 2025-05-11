@@ -49,3 +49,39 @@ def get_username_by_id(user_id):
     if user:
         return user.username
     return None
+
+
+def get_user_by_id(user_id):
+    """
+    Возвращает объект пользователя по его ID
+    """
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == user_id).first()
+    return user
+
+
+def update_user_profile(user_id, username=None, name=None, avatar_link=None):
+    """
+    Обновляет профиль пользователя
+    """
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.id == user_id).first()
+    
+    if not user:
+        return False
+    
+    if username and username != user.username:
+        # Проверяем, не занят ли новый username
+        existing_user = db_sess.query(User).filter(User.username == username).first()
+        if existing_user and existing_user.id != user_id:
+            return False
+        user.username = username
+    
+    if name:
+        user.name = name
+    
+    if avatar_link:
+        user.avatar_link = avatar_link
+    
+    db_sess.commit()
+    return True

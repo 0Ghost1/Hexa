@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify, redirect, url_for, s
 from werkzeug.utils import secure_filename
 import os
 from other import generate_random_sid, hash_string_sha256
-from data_request import create_new_user, search_user_sid, check_username, get_username_by_id
+from data_request import create_new_user, search_user_sid, check_username, get_username_by_id, get_user_by_id, update_user_profile
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -105,15 +105,18 @@ def messenger():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     
-    # Получаем username по user_id
-    username = get_username_by_id(session['user_id'])
+    # Получаем данные пользователя по user_id
+    user = get_user_by_id(session['user_id'])
     
-    if not username:
-        # Если username не найден, сбрасываем сессию
+    if not user:
+        # Если пользователь не найден, сбрасываем сессию
         session.clear()
         return redirect(url_for('login'))
-        
-    return render_template('messenger.html', username=username)
+    
+    # Определяем путь к аватару
+    avatar = user.avatar_link.split('/')[-1] if user.avatar_link else 'default-avatar.png'
+    
+    return render_template('messenger.html', username=user.username, name=user.name, avatar=avatar)
 
 
 @app.route('/show_sid/<sid1>/<sid2>/<sid3>/<sid4>')
@@ -136,6 +139,43 @@ def set_session():
         session['user_id'] = int(data['user_id'])
         return jsonify(success=True)
     return jsonify(success=False), 400
+
+
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    """
+    Обрабатывает запрос на обновление профиля пользователя
+    """
+    if 'user_id' not in session:
+        return jsonify(success=False, error="Not authenticated"), 401
+    
+    user_id = session['user_id']
+    username = request.form.get('username')
+    name = request.form.get('name')
+    avatar_link = None
+    
+    # Обработка загрузки аватара
+    if 'avatar' in request.files:
+        file = request.files['avatar']
+        if file and file.filename:
+            # Создаем безопасное имя файла
+            avatar_filename = secure_filename(file.filename)
+            # Создаем уникальное имя файла, добавляя метку времени
+            filename_parts = os.path.splitext(avatar_filename)
+            import time
+            avatar_filename = f"{filename_parts[0]}_{int(time.time())}{filename_parts[1]}"
+            # Полный путь для сохранения в БД
+            avatar_link = f"static/avatar/{avatar_filename}"
+            # Сохраняем файл
+            file.save(os.path.join(app.config['AVATAR_FOLDER'], avatar_filename))
+    
+    # Обновляем профиль пользователя
+    success = update_user_profile(user_id, username, name, avatar_link)
+    
+    if success:
+        return jsonify(success=True), 200
+    else:
+        return jsonify(success=False, error="Failed to update profile"), 400
 
 
 if __name__ == '__main__':
