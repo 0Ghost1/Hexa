@@ -1,9 +1,20 @@
 from random_word import RandomWords
 import hashlib
-import os
+import os, re
 from PIL import Image
 import time
 from werkzeug.utils import secure_filename
+from better_profanity import profanity
+
+
+def is_bad(text, custom_bad_words=None):
+    profanity.load_censor_words()
+
+    if custom_bad_words:
+        profanity.add_censor_words(custom_bad_words)
+
+    return profanity.contains_profanity(text)
+
 
 
 def generate_random_sid():
@@ -67,17 +78,7 @@ def save_avatar(avatar_file, username):
 
 
 def resize_image_to_square(img, size):
-    """
-    Изменяет размер изображения до квадрата с сохранением пропорций.
 
-    Args:
-        img: Объект изображения PIL
-        size: Размер стороны квадрата
-
-    Returns:
-        Image: Обработанное изображение
-    """
-    # Получаем размеры оригинального изображения
     width, height = img.size
 
     # Определяем, какая сторона меньше
@@ -108,6 +109,8 @@ def check_file_name(name_file):
 
 
 def rename_file(old_file, new_file):
+    if new_file == old_file:
+        return True
     try:
         if os.path.exists(old_file):
             if os.path.exists(new_file):
@@ -116,5 +119,27 @@ def rename_file(old_file, new_file):
             return True
     except Exception as e:
         return False
+
+
+def moderation_username(username):
+    if len(username) < 3:
+        return False, "ERROR: Username is very short"
+    if len(username) > 20:
+        return False, "ERROR: Username is very long"
+
+    if not re.match(r'^[a-zA-Z]', username):
+        return False, "ERROR: Username must begin with a letter"
+
+    if not re.match(r'^[a-zA-Z0-9_\-\.]+$', username):
+        return False, "ERROR: There are forbidden characters"
+
+    if is_bad(username):
+        return False, "ERROR: Username is bad"
+
+    forbidden_names = {"admin", "root", "moderator", "support", "system", "kirill_loshara"}
+    if username.lower() in forbidden_names:
+        return False, "ERROR: Username is prohibited"
+
+    return True, "OK"
 
 
