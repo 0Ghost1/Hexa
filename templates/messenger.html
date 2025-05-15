@@ -23,6 +23,12 @@
             font-family: 'Qager', 'Press Start 2P', cursive !important;
         }
 
+        /* Установка черного фона для всех основных элементов */
+        body, .messenger-container, .sidebar, .chat-area, .chat-item,
+        .messages-container, .search-input, .message-input {
+            background-color: #000000;
+        }
+
         /* Добавляем стили для мерцающего текста */
         .glitch-text {
             animation: textFlicker 0.5s infinite;
@@ -34,44 +40,105 @@
             100% { opacity: 1.0; }
         }
         
-        /* Делаем рамки толще */
+        /* Делаем рамки толще и убираем свечение */
         .sidebar {
-            border-right: 6px solid #00ff00;
+            border-right: 8px solid #00ff00;
+            box-shadow: none;
         }
         
         .chat-item {
-            border: 6px solid #00ff00;
-            box-shadow: none; /* Убираем подсветку */
+            border: 8px solid #00ff00;
+            box-shadow: none;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
         }
         
         .chat-item:hover {
             background-color: rgba(0, 60, 0, 0.3);
-            box-shadow: none; /* Убираем подсветку при наведении */
+            box-shadow: none;
         }
         
-        .search-input, .message-input {
-            border: 6px solid #00ff00;
+        .search-input {
+            border: 8px solid #00ff00;
+            box-shadow: none;
         }
         
-        .send-button {
-            border: 6px solid #00ff00;
-        }
-        
-        .user-profile {
-            border-bottom: 6px solid #00ff00;
-            cursor: pointer; /* Добавляем курсор для взаимодействия */
-        }
-        
-        .search-container {
-            border-bottom: 6px solid #00ff00;
-        }
-        
-        .chat-header {
-            border-bottom: 6px solid #00ff00;
+        .message-input {
+            border: 5px solid #00ff00;
+            box-shadow: none;
+            height: 36px;
+            flex-grow: 1;
         }
         
         .message-input-container {
-            border-top: 6px solid #00ff00;
+            border-top: 8px solid #00ff00;
+            display: flex;
+            align-items: center;
+            padding: 10px;
+        }
+        
+        .send-button {
+            border: 5px solid #00ff00;
+            box-shadow: none;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-left: 10px;
+            padding: 0;
+            background-color: #000000;
+        }
+        
+        /* Send arrow icon */
+        .send-icon {
+            width: 0;
+            height: 0;
+            border-top: 10px solid transparent;
+            border-bottom: 10px solid transparent;
+            border-left: 16px solid #00ff00;
+            margin-left: 4px;
+        }
+        
+        .user-profile {
+            border-bottom: 8px solid #00ff00;
+            cursor: pointer;
+            position: relative;
+            box-shadow: none;
+        }
+        
+        .search-container {
+            border-bottom: 8px solid #00ff00;
+        }
+        
+        .chat-header {
+            border-bottom: 8px solid #00ff00;
+        }
+
+        /* Убираем аватарку для профиля */
+        .user-avatar {
+            display: none;
+        }
+        
+        /* Возвращаем отображение аватарок для чатов */
+        .chat-avatar {
+            display: block;
+            width: 40px;
+            height: 40px;
+            border: 3px solid #00ff00;
+            margin-right: 10px;
+            object-fit: cover;
+        }
+        
+        /* Корректируем отображение информации пользователя и чатов */
+        .user-info {
+            margin-left: 10px;
+            width: 100%;
+        }
+        
+        .chat-info {
+            width: calc(100% - 60px);
         }
         
         /* Стили для модального окна настроек профиля */
@@ -82,11 +149,11 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgb(0, 0, 0); /* Полностью черный фон */
+            background-color: rgb(0, 0, 0);
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            overflow: hidden; /* Предотвращаем прокрутку */
+            overflow: hidden;
         }
         
         /* Canvas для анимации в модальном окне */
@@ -97,20 +164,20 @@
             width: 100%;
             height: 100%;
             z-index: 1001;
-            pointer-events: none; /* Пропускаем события через канвас */
+            pointer-events: none;
         }
         
         .modal-content {
-            background-color: rgba(0, 0, 0, 0.7); /* Полупрозрачный фон для контента */
-            border: 6px solid #00ff00;
+            background-color: #000000;
+            border: 8px solid #00ff00;
             padding: 20px;
             width: 80%;
             max-width: 500px;
             color: #00ff00;
             font-family: 'Qager', 'Press Start 2P', cursive;
             position: relative;
-            z-index: 1002; /* Выше канваса */
-            box-shadow: 0 0 40px #00ff00, 0 0 80px #00ff00; /* Добавляем свечение как у кнопок на главной */
+            z-index: 1002;
+            box-shadow: none;
         }
         
         .modal-title {
@@ -144,10 +211,10 @@
         .avatar-preview {
             width: 120px;
             height: 120px;
-            border: 4px solid #00ff00;
+            border: 8px solid #00ff00;
             border-radius: 5px;
             overflow: hidden;
-            box-shadow: 0 0 15px #00ff00;
+            box-shadow: none;
             margin: 0 auto;
         }
         
@@ -157,12 +224,9 @@
             object-fit: cover;
         }
         
-        /* Стиль для уменьшения person.png на 5% */
+        /* Скрываем стандартную аватарку */
         .avatar-preview img.default-avatar {
-            width: 95%;
-            height: 95%;
-            margin: auto;
-            display: block;
+            display: none;
         }
         
         .form-label {
@@ -171,12 +235,13 @@
         }
         
         .form-input {
-            background: transparent;
-            border: 6px solid #00ff00;
+            background: #000000;
+            border: 8px solid #00ff00;
             color: #00ff00;
             padding: 0.8em;
             font-size: 1em;
             font-family: 'Qager', 'Press Start 2P', cursive !important;
+            box-shadow: none;
         }
         
         .button-group {
@@ -186,25 +251,26 @@
         }
         
         .settings-btn {
-            background: transparent;
-            border: 6px solid #00ff00;
+            background: #000000;
+            border: 8px solid #00ff00;
             color: #00ff00;
             padding: 0.8em 1.5em;
             font-size: 1em;
             font-family: 'Qager', 'Press Start 2P', cursive !important;
             cursor: pointer;
             transition: background-color 0.3s;
+            box-shadow: none;
         }
         
         .settings-btn:hover, .settings-btn.selected, .settings-btn:focus {
             background-color: #00ff00;
             color: #000;
-            box-shadow: 0 0 20px #00ff00;
+            box-shadow: none;
         }
         
         .form-input:focus, .form-input.selected {
             background-color: rgba(0, 255, 0, 0.2);
-            box-shadow: 0 0 20px #00ff00;
+            box-shadow: none;
         }
         
         /* Восстанавливаем курсор по всему проекту */
@@ -220,7 +286,54 @@
         }
         
         .message {
-            border: 4px solid #00ff00;
+            border: 8px solid #00ff00;
+            background-color: #000000;
+            box-shadow: none;
+        }
+        
+        /* Logout link styling */
+        .logout-container {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .logout-link {
+            color: #ff0000;
+            text-decoration: none;
+            font-size: 0.8em;
+            padding: 5px;
+            transition: text-shadow 0.3s;
+            cursor: pointer !important;
+            pointer-events: auto;
+        }
+        
+        .logout-link:hover {
+            text-shadow: 0 0 10px #ff0000;
+        }
+        
+        /* Clear session button styling */
+        .clear-button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 2em;
+        }
+        
+        .clear-btn {
+            background: #000000;
+            border-color: #ff0000;
+            color: #ff0000;
+            width: 100%;
+            transition: background-color 0.3s, text-shadow 0.3s;
+            box-shadow: none;
+        }
+        
+        .clear-btn:hover, .clear-btn:focus, .clear-btn.selected {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000;
+            box-shadow: none;
         }
     </style>
 </head>
@@ -230,7 +343,6 @@
         <div class="sidebar">
             <!-- User Profile -->
             <div class="user-profile nav-item" data-index="0" data-glitch id="profileSettings">
-                <img src="{{ url_for('static', filename='uploads/' + avatar) if avatar else url_for('static', filename='uploads/default-avatar.png') }}" alt="Avatar" class="user-avatar">
                 <div class="user-info">
                     <span class="username">{{ username }}</span>
                 </div>
@@ -244,7 +356,7 @@
             <!-- Chat List -->
             <div class="chats-list">
                 <div class="chat-item nav-item" data-index="2">
-                    <img src="{{ url_for('static', filename='uploads/default-avatar.png') }}" alt="Avatar" class="chat-avatar">
+                    <img src="/static/uploads/default-avatar.png" alt="Avatar" class="chat-avatar" onerror="this.src='/static/person.png'">
                     <div class="chat-info">
                         <span class="chat-name" data-glitch>Chat 1</span>
                         <span class="last-message">Last message...</span>
@@ -264,7 +376,7 @@
             </div>
             <div class="message-input-container">
                 <input type="text" class="message-input nav-item" data-index="3" placeholder="Type a message...">
-                <button class="send-button nav-item" data-index="4">Send</button>
+                <button class="send-button nav-item" data-index="4"><div class="send-icon"></div></button>
             </div>
         </div>
     </div>
@@ -280,8 +392,8 @@
                     <div class="avatar-preview">
                         <img id="profileAvatarPreview" 
                              src="{{ url_for('static', filename='avatar/' + username + '.png') }}" 
-                             onerror="this.src='{{ url_for('static', filename='person.png') }}'; this.classList.add('default-avatar')" 
-                             alt="Avatar">
+                             alt="Avatar"
+                             onerror="handleAvatarError(this)">
                     </div>
                     <input type="file" name="avatar" id="avatarInput" style="display: none;" accept="image/*" onchange="previewProfileAvatar(event)">
                     <button type="button" class="settings-btn modal-nav-item" data-index="0" id="chooseAvatarBtn">Choose Avatar</button>
@@ -303,6 +415,11 @@
                     <button type="button" class="settings-btn modal-nav-item" data-index="4" id="cancelBtn">Cancel</button>
                     <button type="submit" class="settings-btn modal-nav-item" data-index="5">Save Changes</button>
                 </div>
+                
+                <!-- Clear cookies and session button -->
+                <div class="clear-button-container">
+                    <button type="button" class="settings-btn clear-btn modal-nav-item" data-index="6" id="clearSessionBtn">Clear Session & Cookies</button>
+                </div>
             </form>
         </div>
     </div>
@@ -311,6 +428,15 @@
     <script src="{{ url_for('static', filename='messenger-navigation.js') }}"></script>
     <script src="{{ url_for('static', filename='matrix-rain.js') }}"></script>
     <script>
+        // Function to handle avatar error
+        function handleAvatarError(img) {
+            if (img.id === 'profileAvatarPreview') {
+                img.style.display = 'none'; // Hide the profile avatar completely
+            } else {
+                img.src = '/static/person.png'; // Use default avatar for chat icons
+            }
+        }
+        
         // Функция для предпросмотра аватара
         function previewProfileAvatar(event) {
             const file = event.target.files[0];
@@ -319,7 +445,7 @@
                 reader.onload = function(e) {
                     const img = document.getElementById('profileAvatarPreview');
                     img.src = e.target.result;
-                    img.classList.remove('default-avatar'); // Удаляем класс default-avatar при загрузке своего изображения
+                    img.style.display = 'block'; // Show the image when a custom one is loaded
                 };
                 reader.readAsDataURL(file);
             }
@@ -329,7 +455,11 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Make user profile clickable to open settings
             document.getElementById('profileSettings').addEventListener('click', function() {
+                // Show modal and initialize
                 document.getElementById('profileModal').style.display = 'flex';
+                initModalMatrixAnimation();
+                currentModalIndex = 0; // Reset index when opening
+                setTimeout(setupModalNavigation, 100); // Small delay to ensure loading
             });
             
             // Enhance chat item click handling
@@ -468,14 +598,6 @@
                 }
             }
             
-            // Обработчик для открытия модального окна, запуска анимации и настройки навигации
-            document.getElementById('profileSettings').addEventListener('click', function() {
-                document.getElementById('profileModal').style.display = 'flex';
-                initModalMatrixAnimation();
-                currentModalIndex = 0; // Сбрасываем индекс при открытии
-                setTimeout(setupModalNavigation, 100); // Небольшая задержка для гарантии загрузки
-            });
-            
             // Навигация в модальном окне с помощью стрелок и Enter
             let modalNavItems = document.querySelectorAll('.modal-nav-item');
             let currentModalIndex = 0;
@@ -514,6 +636,11 @@
                                 document.getElementById('profileModal').style.display = 'none';
                                 stopModalMatrixAnimation();
                                 document.removeEventListener('keydown', handleModalKeyDown);
+                            } else if (currentElement.id === 'clearSessionBtn') {
+                                // If this is the clear session button, confirm and redirect to logout
+                                if (confirm('Are you sure you want to clear your session and cookies? You will be logged out.')) {
+                                    window.location.href = '/logout';
+                                }
                             } else if (currentElement.tagName === 'BUTTON' && currentElement.type === 'submit') {
                                 // Если это кнопка сохранения, отправляем форму
                                 document.getElementById('profileSettingsForm').dispatchEvent(new Event('submit'));
@@ -550,6 +677,13 @@
                 document.getElementById('avatarInput').click();
             });
             
+            // Обработчик для кнопки очистки сессии и куки
+            document.getElementById('clearSessionBtn').addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear your session and cookies? You will be logged out.')) {
+                    window.location.href = '/logout';
+                }
+            });
+            
             // Также остановить анимацию при успешном сохранении
             document.getElementById('profileSettingsForm').addEventListener('submit', function(e) {
                 e.preventDefault();
@@ -571,15 +705,11 @@
                         // Update displayed data
                         document.querySelector('.username').textContent = formData.get('username');
                         
-                        // Update avatar if provided
-                        if (data.avatar_path) {
-                            document.querySelector('.user-avatar').src = data.avatar_path;
-                        }
-                        
                         // Close modal and stop animation
                         document.getElementById('profileModal').style.display = 'none';
                         stopModalMatrixAnimation();
                     } else {
+                        // Показываем ошибку через alert
                         alert(data.error || 'An error occurred');
                     }
                     

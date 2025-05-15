@@ -68,6 +68,7 @@ def update_user_profile(user_id, username=None, name=None, surname=None, avatar_
         if search_user and search_user.id != user_id:
             return False
         rename_file(avatar_link, f"static/avatar/{username}.png")
+        print(f"static/avatar/{username}.png")
         user.username = username
 
     if name:
