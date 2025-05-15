@@ -240,6 +240,54 @@
         #avatarImg.has-image {
             display: block;
         }
+        
+        /* Remember Me Checkbox Styles */
+        .remember-me-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1em 0;
+            width: 400px;
+            max-width: 90vw;
+        }
+        
+        .remember-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ff00;
+            background: transparent;
+            position: relative;
+            margin-right: 10px;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        
+        .remember-checkbox:checked::before {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ff00;
+            font-size: 14px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .remember-checkbox:focus {
+            box-shadow: 0 0 10px #00ff00;
+            outline: none;
+        }
+        
+        .remember-label {
+            color: #00ff00;
+            font-size: 1em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            cursor: pointer;
+            pointer-events: auto;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -275,6 +323,10 @@
         <div class="screen" id="regStep3" style="display:none;">
             <div class="reg-title">register to</div>
             <div class="reg-label">press [register] to complete</div>
+            <div class="remember-me-container">
+                <input type="checkbox" id="remember_me" name="remember_me" class="remember-checkbox">
+                <label for="remember_me" class="remember-label">Remember me</label>
+            </div>
             <button type="button" class="reg-btn-square" id="step3BackBtn">[back]</button>
             <button type="submit" class="reg-btn-square" id="registerBtn">[register]</button>
             <div class="keyboard-hint">NAVIGATE: [↓] [↑] | SELECT: [ENTER]</div>
@@ -299,15 +351,15 @@
             */
             
             // Проверка на ввод только латинских символов
-            document.querySelectorAll('input[type="text"]').forEach(input => {
-                input.addEventListener('input', function(e) {
-                    const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
-                    if (!englishOnly.test(this.value)) {
-                        // Удаляем последний символ, если он не соответствует шаблону
-                        this.value = this.value.slice(0, -1);
-                    }
-                });
+        document.querySelectorAll('input[type="text"]').forEach(input => {
+            input.addEventListener('input', function(e) {
+                const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+                if (!englishOnly.test(this.value)) {
+                    // Удаляем последний символ, если он не соответствует шаблону
+                    this.value = this.value.slice(0, -1);
+                }
             });
+        });
         
             // Подсветка кнопок при фокусе
             document.querySelectorAll('.reg-btn-square, #avatarSelector').forEach(element => {
@@ -364,7 +416,7 @@
             setupMatrixEffect();
             
             // Устанавливаем начальный шаг и фокус
-            window.currentStep = 1;
+        window.currentStep = 1;
             document.querySelector('#regStep1 .reg-input').focus();
             
             // Устанавливаем обработчик клавиш
@@ -414,7 +466,7 @@
                 } else if (window.currentStep === 2) {
                     navElems = Array.from(document.querySelectorAll('#regStep2 input[type="text"], #regStep2 .reg-btn-square'));
                 } else if (window.currentStep === 3) {
-                    navElems = Array.from(document.querySelectorAll('#regStep3 input[type="text"], #regStep3 .reg-btn-square'));
+                    navElems = Array.from(document.querySelectorAll('#regStep3 #remember_me, #regStep3 .reg-btn-square'));
                 }
                 
                 if (navElems.length > 0) {

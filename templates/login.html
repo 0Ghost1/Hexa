@@ -124,6 +124,62 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
         }
+        
+        .sid-desc {
+            color: #00ff00;
+            font-size: 1.1em;
+            margin-bottom: 1.2em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            text-align: center;
+        }
+        
+        /* Remember Me Checkbox Styles */
+        .remember-me-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1em 0;
+            width: 400px;
+            max-width: 90vw;
+        }
+        
+        .remember-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ff00;
+            background: transparent;
+            position: relative;
+            margin-right: 10px;
+            cursor: pointer;
+            pointer-events: auto;
+        }
+        
+        .remember-checkbox:checked::before {
+            content: "✓";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #00ff00;
+            font-size: 14px;
+            text-shadow: 0 0 5px #00ff00;
+        }
+        
+        .remember-checkbox:focus {
+            box-shadow: 0 0 10px #00ff00;
+            outline: none;
+        }
+        
+        .remember-label {
+            color: #00ff00;
+            font-size: 1em;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            cursor: pointer;
+            pointer-events: auto;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -152,6 +208,10 @@
                     <label class="sid-label" for="sid4">SID4</label>
                     <input type="password" id="sid4" name="sid4" class="sid-input" required>
                 </div>
+            </div>
+            <div class="remember-me-container">
+                <input type="checkbox" id="remember_me" name="remember_me" class="remember-checkbox">
+                <label for="remember_me" class="remember-label">Remember me</label>
             </div>
             <button type="submit" class="login-btn" id="loginBtn">[login]</button>
         </form>
@@ -230,29 +290,29 @@
             */
             
             // Обновляем ссылки на поля ввода
-            const fields = [
-                document.getElementById('sid1'),
-                document.getElementById('sid2'),
-                document.getElementById('sid3'),
-                document.getElementById('sid4'),
-                document.getElementById('loginBtn')
-            ];
-            let currentField = 0;
-            fields[currentField].focus();
-            
-            // Проверка на ввод только латинских символов
-            fields.forEach(field => {
+        const fields = [
+            document.getElementById('sid1'),
+            document.getElementById('sid2'),
+            document.getElementById('sid3'),
+            document.getElementById('sid4'),
+            document.getElementById('loginBtn')
+        ];
+        let currentField = 0;
+        fields[currentField].focus();
+        
+        // Проверка на ввод только латинских символов
+        fields.forEach(field => {
                 if (field && field.type === 'password') {
-                    field.addEventListener('input', function(e) {
-                        const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
-                        if (!englishOnly.test(this.value)) {
-                            // Удаляем последний символ, если он не соответствует шаблону
-                            this.value = this.value.slice(0, -1);
-                        }
-                    });
-                }
-            });
-            
+                field.addEventListener('input', function(e) {
+                    const englishOnly = /^[a-zA-Z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+                    if (!englishOnly.test(this.value)) {
+                        // Удаляем последний символ, если он не соответствует шаблону
+                        this.value = this.value.slice(0, -1);
+                    }
+                });
+            }
+        });
+        
             // Add click handler for login button
             document.getElementById('loginBtn').addEventListener('click', function(e) {
                 e.preventDefault();
