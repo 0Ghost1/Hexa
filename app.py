@@ -13,8 +13,8 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['AVATAR_FOLDER'] = 'static/avatar'
 app.config['MAX_CONTENT_LENGTH'] = (16 * 1024
                                     * 1024)
-app.secret_key = 'HEXAtheBESTSIte'
-app.config['COOKIE_MAX_AGE'] = 30 * 24 * 60 * 60
+app.secret_key = 'ftyfhtfghvgkvgsvgvwgcvwjvjchsgjvgjevjcvbevghvhgvhegvcghwbe hgvghbvjhbjohve ov oghe o'
+app.config['COOKIE_MAX_AGE'] = 30 * 24 * 60 * 60  # 30 days in seconds
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 os.makedirs(app.config['AVATAR_FOLDER'], exist_ok=True)
@@ -80,9 +80,11 @@ def register():
 
         resp = redirect(url_for('show_sid', sid1=sid_words[0], sid2=sid_words[1], sid3=sid_words[2], sid4=sid_words[3]))
 
+        # Set persistent cookie if remember_me is checked
         if remember_me:
             resp.set_cookie('hexa_user_id', str(new_user_id), max_age=app.config['COOKIE_MAX_AGE'], httponly=True)
 
+        # Показываем SID фразы
         print(f'show_sid/sid1={sid_words[0]}/sid2={sid_words[1]}/sid3={sid_words[2]}/sid4={sid_words[3]}')
         return resp
 
@@ -132,10 +134,13 @@ def login():
 
 @app.route('/logout')
 def logout():
+    # Clear the session
     session.clear()
 
+    # Create response for redirection
     resp = redirect(url_for('index'))
 
+    # Clear the cookie
     resp.delete_cookie('hexa_user_id')
 
     return resp
@@ -238,6 +243,8 @@ def set_session():
     return jsonify(success=False), 400
 
 
+# Новые маршруты для работы с чатами и сообщениями
+
 @app.route('/api/chats')
 def get_chats():
     if 'user_id' not in session:
@@ -278,6 +285,7 @@ def send_chat_message(chat_id):
         participants = get_chat_participants(chat_id)
         if participants:
             receiver_id = participants[1] if participants[0] == user_id else participants[0]
+            # оделать уведомления
 
         return jsonify(success=True, message_id=message_id)
     else:
@@ -347,5 +355,54 @@ def view_chat(chat_id):
                            messages=messages)
 
 
+@app.route('/api/command', methods=['POST'])
+def execute_command():
+    """
+    API для выполнения команды от имени пользователя.
+
+    Args:
+        username (POST): Имя пользователя (из тела запроса)
+        command (POST): Команда для выполнения (из тела запроса)
+
+    Returns:
+        json: Результат выполнения команды
+    """
+    data = request.get_json()
+    print(data)
+
+    if not data or 'username' not in data or 'command' not in data:
+        return jsonify({"error": "Username and command are required"}), 400
+
+    username = data['username']
+    command = data['command']
+
+    user = get_user(username)
+    if not user:
+        return jsonify({
+            'success': False,
+            'message': f"User {username} not found"}
+        )
+
+    if int(command) == 1:
+        return jsonify({
+            'success': False,
+            'message': get_user(username)}
+        )
+    elif int(command) == 2:
+        res = delete_user_account(username)
+        return jsonify({
+            'success': res[0],
+            'message': res[1]}
+        )
+    elif int(command) == 3:
+        res = find_user_chats(username)
+        return jsonify({
+            'success': res[0],
+            'message': res[1]}
+        )
+
+
+
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True)
+    app.run(debug=True)
