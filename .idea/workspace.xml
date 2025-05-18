@@ -4,25 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="0c55fec3-c901-438f-92cf-b3ef84adfb6d" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/API/IamTheGodHexa.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/static/avatar/person.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/pythonProject.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hexa.pptx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/chat.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/chat.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_request.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_request.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db/blogs.db" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/other.py" beforeDir="false" afterPath="$PROJECT_DIR$/other.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/qwerty.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/chat.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/chat.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/messenger.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/messenger.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/register.html" afterDir="false" />
+    <list default="true" id="0c55fec3-c901-438f-92cf-b3ef84adfb6d" name="Changes" comment="Commit reliase FULL">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,14 +79,36 @@
       <option name="presentableId" value="Default" />
       <updated>1747504493399</updated>
     </task>
+    <task id="LOCAL-00001" summary="Commit reliase">
+      <option name="closed" value="true" />
+      <created>1747597475922</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1747597475922</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Commit reliase FULL">
+      <option name="closed" value="true" />
+      <created>1747598019493</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1747598019493</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Commit reliase" />
+    <MESSAGE value="Commit reliase FULL" />
+    <option name="LAST_COMMIT_MESSAGE" value="Commit reliase FULL" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/other.py</url>
-          <line>144</line>
+          <line>121</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
       </breakpoints>
