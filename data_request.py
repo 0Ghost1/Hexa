@@ -17,7 +17,6 @@ def create_new_user(username, name, surname, sid1, sid2, sid3, sid4, avatar_link
         if existing_user:
             raise ValueError(f"Пользователь с именем {username} уже существует")
         
-        # Создаем нового пользователя
         user = User()
         user.username = username
         user.name = name
@@ -316,15 +315,6 @@ def get_other_user_id_in_chat(chat_id):
 
 
 def delete_user_account(username):
-    """
-    Удаляет аккаунт пользователя и все связанные с ним чаты и сообщения.
-
-    Args:
-        username (str): Имя пользователя для удаления
-
-    Returns:
-        bool: True, если удаление прошло успешно, иначе False
-    """
     db_sess = db_session.create_session()
     try:
         user = db_sess.query(User).filter(User.username == username).first()
@@ -350,15 +340,6 @@ def delete_user_account(username):
 
 
 def find_user_chats(username):
-    """
-    Ищет все чаты указанного пользователя.
-
-    Args:
-        username (str): Имя пользователя для поиска чатов
-
-    Returns:
-        list: Список словарей с информацией о чатах пользователя
-    """
     db_sess = db_session.create_session()
     try:
         user = db_sess.query(User).filter(User.username == username).first()

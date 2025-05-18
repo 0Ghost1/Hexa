@@ -23,13 +23,10 @@ class User(SqlAlchemyBase):
 
     avatar_link = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     
-    # Отношения для чатов, где пользователь является инициатором
     chats_initiated = orm.relationship('Chat', foreign_keys='Chat.user1_id', 
                                       backref='initiator', lazy='dynamic')
-    # Отношения для чатов, где пользователь является получателем
     chats_received = orm.relationship('Chat', foreign_keys='Chat.user2_id', 
                                     backref='receiver', lazy='dynamic')
-    # Отношения для сообщений, отправленных пользователем
     messages = orm.relationship('Message', foreign_keys='Message.sender_id', 
                               backref='sender', lazy='dynamic')
 

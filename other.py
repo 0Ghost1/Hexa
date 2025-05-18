@@ -21,7 +21,6 @@ def generate_random_sid():
     sid_words = []
     for _ in range(4):
         word = None
-        # Иногда random-word может вернуть None, повторяем до получения слова
         while not word:
             word = RandomW.get_random_word()
         sid_words.append(word)
@@ -36,40 +35,22 @@ def hash_string_sha256(input_string):
 
 
 def save_avatar(avatar_file, username):
-    """
-    Сохраняет аватарку пользователя в формате PNG в директорию static/avatar.
-
-    Args:
-        avatar_file: Файл изображения (из request.files)
-        username: Имя пользователя для использования в названии файла
-
-    Returns:
-        str: Путь к сохраненному файлу относительно корня проекта
-    """
-    # Проверяем, что директория существует
     avatar_dir = 'static/avatar'
     os.makedirs(avatar_dir, exist_ok=True)
 
-    # Создаем безопасное имя файла на основе имени пользователя
     safe_username = secure_filename(username)
 
-    # Добавляем временную метку для уникальности
     filename = f"{safe_username}.png"
 
-    # Полный путь для сохранения файла
     filepath = os.path.join(avatar_dir, filename)
 
     try:
-        # Открываем и обрабатываем изображение с помощью PIL
         img = Image.open(avatar_file)
 
-        # Изменяем размер до квадрата 200x200
         img = resize_image_to_square(img, 200)
 
-        # Сохраняем в формате PNG
         img.save(filepath, 'PNG')
 
-        # Возвращаем относительный путь для сохранения в БД
         return f"static/avatar/{filename}"
     except Exception as e:
         print(f"Ошибка при сохранении аватара: {e}")
@@ -80,23 +61,19 @@ def resize_image_to_square(img, size):
 
     width, height = img.size
 
-    # Определяем, какая сторона меньше
     if width > height:
-        # Ширина больше высоты - обрезаем по центру
         left = (width - height) / 2
         top = 0
         right = (width + height) / 2
         bottom = height
         img = img.crop((left, top, right, bottom))
     elif height > width:
-        # Высота больше ширины - обрезаем по центру
         left = 0
         top = (height - width) / 2
         right = width
         bottom = (height + width) / 2
         img = img.crop((left, top, right, bottom))
 
-    # Изменяем размер до указанного
     return img.resize((size, size), Image.LANCZOS)
 
 
