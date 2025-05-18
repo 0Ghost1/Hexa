@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for, session
 from werkzeug.utils import secure_filename
 import os
-from other import generate_random_sid, hash_string_sha256, save_avatar, rename_file, check_file_name, moderation_username
-from data_request import (create_new_user, search_user_sid, check_username, get_user_by_id, 
-                         update_user_profile, get_username, get_user_chats, get_or_create_chat, 
-                         send_message, get_chat_messages, search_users, get_chat_participants)
+from other import generate_random_sid, hash_string_sha256, save_avatar, rename_file, check_file_name, \
+    moderation_username
+from data_request import (create_new_user, search_user_sid, check_username, get_user_by_id,
+                          update_user_profile, get_username, get_user_chats, get_or_create_chat,
+                          send_message, get_chat_messages, search_users, get_chat_participants, get_user,
+                          get_other_user_id_in_chat, delete_user_account, find_user_chats)
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
@@ -76,7 +78,6 @@ def register():
             print(new_user_id)
             session['user_id'] = new_user_id
 
-        # Create response with SID redirection
         resp = redirect(url_for('show_sid', sid1=sid_words[0], sid2=sid_words[1], sid3=sid_words[2], sid4=sid_words[3]))
 
         # Set persistent cookie if remember_me is checked
@@ -144,6 +145,7 @@ def logout():
 
     return resp
 
+
 @app.route('/messenger')
 def messenger():
     if 'user_id' not in session:
@@ -157,7 +159,7 @@ def messenger():
         session.clear()
         return resp
 
-    avatar = f"static/avatar/{user.username}.png" if check_file_name(
+    avatar = f"{user.username}.png" if check_file_name(
         f"static/avatar/{user.username}.png") else "person.png"
     print(avatar, f"static/avatar/{user.username}.png")
     chats = get_user_chats(session['user_id'])
@@ -170,14 +172,40 @@ def show_sid(sid1, sid2, sid3, sid4):
     return render_template('sidsee.html', sid1=sid1, sid2=sid2, sid3=sid3, sid4=sid4)
 
 
+@app.route('/profuleuser', methods=['GET'])
+def profile_user():
+    user_id = request.args.get('user_id')
+    print(request.url)
+
+    if not user_id:
+        return jsonify(success=False, error="Имя пользователя не указано"), 400
+
+    user = get_user_by_id(get_other_user_id_in_chat(user_id))
+
+    if not user:
+        return jsonify(success=False, error="Пользователь не найден"), 404
+
+    avatar = f"{user.username}.png" if check_file_name(f"static/avatar/{user.username}.png") else "person.png"
+
+    return jsonify({
+        'success': True,
+        'username': user.username,
+        'name': user.name,
+        'surname': user.surname,
+        'avatar': avatar
+    })
+
+
 @app.route('/update_profile', methods=['POST'])
 def update_profile():
+    print(1)
     user_id = request.cookies.get('hexa_user_id')
+    print(user_id)
     if user_id:
         user = get_user_by_id(int(user_id))
+        print(user.username)
         if user:
             session['user_id'] = int(user_id)
-            return redirect(url_for('messenger'))
 
     user_id = session['user_id']
     username = request.form.get('username')
@@ -198,12 +226,12 @@ def update_profile():
             return jsonify(success=False, error="ERROR: username incorrect"), 400
 
     update = update_user_profile(user_id, username, name, surname, avatar_link)
+    print(update)
 
     if update:
         return jsonify(success=True), 200
     else:
         return jsonify(success=False, error="Failed to update profile"), 400
-
 
 
 @app.route('/set_session', methods=['POST'])
@@ -215,19 +243,16 @@ def set_session():
     return jsonify(success=False), 400
 
 
-
-
 # Новые маршруты для работы с чатами и сообщениями
 
 @app.route('/api/chats')
 def get_chats():
-
     if 'user_id' not in session:
         return jsonify(success=False, error="Not authenticated"), 401
-    
+
     user_id = session['user_id']
     chats = get_user_chats(user_id)
-    
+
     return jsonify(success=True, chats=chats)
 
 
@@ -235,10 +260,10 @@ def get_chats():
 def get_chat(chat_id):
     if 'user_id' not in session:
         return jsonify(success=False, error="Not authenticated"), 401
-    
+
     user_id = session['user_id']
     messages = get_chat_messages(chat_id, user_id)
-    
+
     return jsonify(success=True, messages=messages)
 
 
@@ -246,22 +271,22 @@ def get_chat(chat_id):
 def send_chat_message(chat_id):
     if 'user_id' not in session:
         return jsonify(success=False, error="Not authenticated"), 401
-    
+
     user_id = session['user_id']
     data = request.get_json()
-    
+
     if not data or 'content' not in data:
         return jsonify(success=False, error="Message content is required"), 400
-    
+
     content = data['content']
     message_id = send_message(chat_id, user_id, content)
-    
+
     if message_id:
         participants = get_chat_participants(chat_id)
         if participants:
             receiver_id = participants[1] if participants[0] == user_id else participants[0]
-            #оделать уведомления
-            
+            # оделать уведомления
+
         return jsonify(success=True, message_id=message_id)
     else:
         return jsonify(success=False, error="Failed to send message"), 400
@@ -271,13 +296,13 @@ def send_chat_message(chat_id):
 def search_users_api():
     if 'user_id' not in session:
         return jsonify(success=False, error="Not authenticated"), 401
-    
+
     user_id = session['user_id']
     query = request.args.get('q', '')
-    
+
     if not query:
         return jsonify(success=True, users=[])
-    
+
     users = search_users(query, user_id)
     return jsonify(success=True, users=users)
 
@@ -286,16 +311,16 @@ def search_users_api():
 def create_chat():
     if 'user_id' not in session:
         return jsonify(success=False, error="Not authenticated"), 401
-    
+
     user_id = session['user_id']
     data = request.get_json()
-    
+
     if not data or 'user_id' not in data:
         return jsonify(success=False, error="User ID is required"), 400
-    
+
     other_user_id = data['user_id']
     chat_id = get_or_create_chat(user_id, other_user_id)
-    
+
     return jsonify(success=True, chat_id=chat_id)
 
 
@@ -303,10 +328,10 @@ def create_chat():
 def view_chat(chat_id):
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
+
     user_id = session['user_id']
     user = get_user_by_id(user_id)
-    
+
     if not user:
         session.clear()
         return redirect(url_for('login'))
@@ -317,17 +342,64 @@ def view_chat(chat_id):
         return redirect(url_for('messenger'))
 
     all_chats = get_user_chats(user_id)
-    
+
     avatar = f"{user.username}.png" if check_file_name(f"{user.username}.png") else "person.png"
-    
-    return render_template('messenger.html', 
-                          username=user.username, 
-                          name=user.name, 
-                          surname=user.surname, 
-                          avatar=avatar, 
-                          chats=all_chats, 
-                          active_chat_id=chat_id, 
-                          messages=messages)
+
+    return render_template('messenger.html',
+                           username=user.username,
+                           name=user.name,
+                           surname=user.surname,
+                           avatar=avatar,
+                           chats=all_chats,
+                           active_chat_id=chat_id,
+                           messages=messages)
+
+
+@app.route('/api/command', methods=['POST'])
+def execute_command():
+    """
+    API для выполнения команды от имени пользователя.
+
+    Args:
+        username (POST): Имя пользователя (из тела запроса)
+        command (POST): Команда для выполнения (из тела запроса)
+
+    Returns:
+        json: Результат выполнения команды
+    """
+    data = request.get_json()
+    print(data)
+
+    if not data or 'username' not in data or 'command' not in data:
+        return jsonify({"error": "Username and command are required"}), 400
+
+    username = data['username']
+    command = data['command']
+
+    user = get_user(username)
+    if not user:
+        return jsonify({
+            'success': False,
+            'message': f"User {username} not found"}
+        )
+
+    if int(command) == 1:
+        return jsonify({
+            'success': False,
+            'message': get_user(username)}
+        )
+    elif int(command) == 2:
+        res = delete_user_account(username)
+        return jsonify({
+            'success': res[0],
+            'message': res[1]}
+        )
+    elif int(command) == 3:
+        res = find_user_chats(username)
+        return jsonify({
+            'success': res[0],
+            'message': res[1]}
+        )
 
 
 if __name__ == '__main__':

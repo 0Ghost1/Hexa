@@ -135,12 +135,13 @@ def moderation_username(username):
     if is_bad(username):
         return False, "ERROR: Username is bad"
 
-    forbidden_names = {"admin", "root", "moderator", "support", "system", "kirill_loshara"}
+    forbidden_names = {"admin", "root", "moderator", "support", "system", "kirill_loshara", "person"}
     if username.lower() in forbidden_names:
         return False, "ERROR: Username is prohibited"
 
     return True, "OK"
 
 
-def codig_message():
-    pass
+#def codig_message():
+#    pass
+# я решил не делать шифрование) KirealTheBest

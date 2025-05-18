@@ -42,6 +42,30 @@
         .chat-item {
             border: 6px solid #00ff00;
             box-shadow: none; /* Убираем подсветку */
+х            display: flex;
+            align-items: center;
+            padding: 10px;
+            position: relative;
+            margin-bottom: 10px;
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            margin-right: 15px;
+            border: 2px solid #00ff00;
+            overflow: hidden;
+            border-radius: 5px;
+        }
+
+        .chat-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .chat-info {
+            flex: 1;
         }
         
         .chat-item:hover {
@@ -177,6 +201,15 @@
             padding: 0.8em;
             font-size: 1em;
             font-family: 'Qager', 'Press Start 2P', cursive !important;
+        }
+    
+        
+        /* Стиль для отображения информации в профиле собеседника */
+        .settings-form .form-input:not(input) {
+            min-height: 1.5em;
+            display: flex;
+            align-items: center;
+            background-color: rgba(0, 30, 0, 0.3);
         }
         
         .button-group {
@@ -440,6 +473,15 @@
             margin: 0;
             text-align: center;
             width: 100%;
+            background: transparent;
+            border: none;
+            font-family: 'Qager', 'Press Start 2P', cursive !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-title:hover {
+            text-shadow: 0 0 10px #00ff00;
         }
     </style>
 </head>
@@ -449,7 +491,7 @@
         <div class="sidebar">
             <!-- User Profile -->
             <div class="user-profile nav-item" data-index="0" data-glitch id="profileSettings">
-                <img src="{{ url_for('static', filename='avatar/' + avatar) }}" alt="Avatar" class="user-avatar" onerror="this.src='{{ url_for('static', filename='person.png') }}'">
+                <img src="{{ url_for('static', filename='avatar/' + avatar) }}" alt="Avatar" class="user-avatar" onerror="this.src='/static/avatar/person.png'">
                 <div class="user-info">
                     <span class="username">{{ username }}</span>
                 </div>
@@ -464,9 +506,10 @@
             <div class="chat-list">
                 {% if chats %}
                     {% for chat in chats %}
-                        <div class="chat-item nav-item" data-index="{{ loop.index + 1 }}" data-chat-id="{{ chat.chat_id }}" {% if active_chat_id and active_chat_id == chat.chat_id %}class="active"{% endif %}>
+                        <div class="chat-item nav-item" data-index="{{ loop.index + 1 }}" data-chat-id="{{ chat.chat_id }}" data-username="@{{ chat.other_user.username }}" {% if active_chat_id and active_chat_id == chat.chat_id %}class="active"{% endif %}>
                             <div class="chat-avatar">
-                                <img src="{{ url_for('static', filename='avatar/' + chat.other_user.avatar) }}" alt="{{ chat.other_user.username }}" onerror="this.src='{{ url_for('static', filename='person.png') }}'">
+                                <img src="{{ url_for('static', filename='avatar/' + chat.other_user.avatar) }}" onerror="this.src='/static/avatar/person.png'">
+
                             </div>
                             <div class="chat-info">
                                 <span class="chat-name" data-glitch>{{ chat.other_user.name }} {{ chat.other_user.surname }}</span>
@@ -491,7 +534,7 @@
         <!-- Main Chat Area -->
         <div class="chat-area">
             <div class="chat-header">
-                <h2 class="chat-title" data-glitch>
+                <button class="chat-title nav-item" data-index="2" data-glitch style="width: 100%; padding: 10px;">
                     {% if active_chat_id and chats %}
                         {% for chat in chats %}
                             {% if chat.chat_id == active_chat_id %}
@@ -499,9 +542,9 @@
                             {% endif %}
                         {% endfor %}
                     {% else %}
-                        Выберите чат
+                        -choice the chat-
                     {% endif %}
-                </h2>
+                </button>
             </div>
             <div class="chat-messages">
                 {% if messages %}
@@ -520,14 +563,14 @@
                         </div>
                     {% else %}
                         <div class="select-chat-message">
-                            <p>Выберите чат из списка или найдите нового собеседника.</p>
+                            <p>Select a chat from the list or find a new conversation partner.</p>
                         </div>
                     {% endif %}
                 {% endif %}
             </div>
             <div class="message-input-container">
                 <input type="text" class="message-input nav-item" data-index="3" placeholder="Введите сообщение..." {% if not active_chat_id %}disabled{% endif %}>
-                <button class="send-button nav-item" data-index="4" {% if not active_chat_id %}disabled{% endif %}>Отправить</button>
+                <button class="send-button nav-item" data-index="4" {% if not active_chat_id %}disabled{% endif %}>-send-</button>
             </div>
         </div>
     </div>
@@ -543,7 +586,7 @@
                     <div class="avatar-preview">
                         <img id="profileAvatarPreview" 
                              src="{{ url_for('static', filename='avatar/' + username + '.png') }}" 
-                             onerror="this.src='{{ url_for('static', filename='person.png') }}'; this.classList.add('default-avatar')" 
+                             onerror="this.src='/static/avatar/person.png'; this.classList.add('default-avatar')"
                              alt="Avatar">
                     </div>
                     <input type="file" name="avatar" id="avatarInput" style="display: none;" accept="image/*" onchange="previewProfileAvatar(event)">
@@ -566,14 +609,50 @@
                     <button type="button" class="settings-btn modal-nav-item" data-index="4" id="cancelBtn">Cancel</button>
                     <button type="submit" class="settings-btn modal-nav-item" data-index="5">Save Changes</button>
                 </div>
+                <div class="button-group" style="margin-top: 1em;">
+                    <button type="button" class="settings-btn modal-nav-item logout-btn" data-index="6" id="logoutBtn" style="width: 100%; background-color: rgba(255, 0, 0, 0.2); border-color: #ff0000; color: white;">Log Out</button>
+                </div>
             </form>
         </div>
     </div>
     
-    <script src="{{ url_for('static', filename='terminal-animation.js') }}"></script>
+    <!-- Модальное окно профиля собеседника -->
+    <div class="profile-settings-modal" id="chatUserProfileModal">
+        <canvas id="chatUserModalMatrixCanvas" class="modal-canvas"></canvas>
+        <div class="modal-content">
+            <div class="modal-title" data-glitch>User Profile</div>
+            <div class="settings-form">
+                <!-- Превью аватара -->
+                <div class="avatar-preview-container">
+                    <div class="avatar-preview">
+                        <img id="chatUserAvatarPreview" src="/static/person.png" alt="Avatar" class="default-avatar">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">@username</label>
+                    <div class="form-input" id="chatUserUsername"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">name</label>
+                    <div class="form-input" id="chatUserName"></div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">surname</label>
+                    <div class="form-input" id="chatUserSurname"></div>
+                </div>
+
+                <div class="button-group">
+                    <button type="button" class="settings-btn" id="closeChatUserProfileBtn">-close-</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='matrix-animations.js') }}"></script>
     <script src="{{ url_for('static', filename='messenger-navigation.js') }}"></script>
-    <script src="{{ url_for('static', filename='matrix-rain.js') }}"></script>
     <script src="{{ url_for('static', filename='chat.js') }}"></script>
+
     
     <!-- Аудио-элемент для уведомлений о новых сообщениях -->
     <audio id="newMessageSound" preload="auto">
@@ -587,9 +666,9 @@
             if (file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const img = document.getElementById('profileAvatarPreview');
-                    img.src = e.target.result;
-                    img.classList.remove('default-avatar'); // Удаляем класс default-avatar при загрузке своего изображения
+                    const preview = document.getElementById('profileAvatarPreview');
+                    preview.src = e.target.result;
+                    preview.classList.remove('default-avatar');
                 };
                 reader.readAsDataURL(file);
             }
@@ -628,6 +707,43 @@
                         }, 300);
                     }
                 });
+            });
+            
+            // Обработчик клика по заголовку чата для просмотра профиля собеседника
+            document.querySelector('.chat-title').addEventListener('click', function() {
+                // Проверяем, выбран ли чат
+                if (this.textContent !== '-choice the chat-') {
+                    // Получаем активный чат
+                    const activeChatItem = document.querySelector('.chat-item.active');
+                    if (activeChatItem) {
+                        // Получаем данные пользователя из активного чата
+                        const username = activeChatItem.querySelector('.chat-name').textContent;
+                        const avatarSrc = activeChatItem.querySelector('.chat-avatar img').src;
+                        
+                        // Заполняем модальное окно данными пользователя
+                        document.getElementById('chatUserAvatarPreview').src = avatarSrc;
+                        document.getElementById('chatUserAvatarPreview').classList.remove('default-avatar');
+                        if (avatarSrc.includes('person.png')) {
+                            document.getElementById('chatUserAvatarPreview').classList.add('default-avatar');
+                        }
+                        
+                        // Разделяем имя и фамилию
+                        const nameParts = username.trim().split(' ');
+                        const firstName = nameParts[0] || '-';
+                        const lastName = nameParts[1] || '-';
+                        
+                        document.getElementById('chatUserName').textContent = firstName;
+                        document.getElementById('chatUserSurname').textContent = lastName;
+                        
+                        // Получаем username из data-атрибута, если есть
+                        const userUsername = activeChatItem.getAttribute('data-username') || '@user';
+                        document.getElementById('chatUserUsername').textContent = userUsername;
+                        
+                        // Открываем модальное окно
+                        document.getElementById('chatUserProfileModal').style.display = 'flex';
+                        initChatUserModalMatrixAnimation();
+                    }
+                }
             });
             
             // Make search input focus on click
@@ -673,12 +789,21 @@
                 }
             });
             
-            // Инициализация матричной анимации для модального окна
+            // Обработчик для кнопки выхода из сессии
+            document.getElementById('logoutBtn').addEventListener('click', function() {
+                window.location.href = '/logout';
+            });
+            
+            // Инициализация матричной анимации для модальных окон
             let modalMatrixCanvas = null;
             let modalMatrixCtx = null;
             let modalMatrixIntervalId = null;
             
-            // Функция инициализации матричной анимации при открытии модального окна
+            let chatUserModalMatrixCanvas = null;
+            let chatUserModalMatrixCtx = null;
+            let chatUserModalMatrixIntervalId = null;
+            
+            // Функция инициализации матричной анимации при открытии модального окна настроек
             function initModalMatrixAnimation() {
                 modalMatrixCanvas = document.getElementById('modalMatrixCanvas');
                 if (!modalMatrixCanvas) return;
@@ -730,7 +855,59 @@
                 modalMatrixIntervalId = setInterval(drawMatrix, 50);
             }
             
-            // Функция остановки анимации
+            // Функция инициализации матричной анимации для модального окна профиля собеседника
+            function initChatUserModalMatrixAnimation() {
+                chatUserModalMatrixCanvas = document.getElementById('chatUserModalMatrixCanvas');
+                if (!chatUserModalMatrixCanvas) return;
+                
+                chatUserModalMatrixCanvas.width = window.innerWidth;
+                chatUserModalMatrixCanvas.height = window.innerHeight;
+                
+                chatUserModalMatrixCtx = chatUserModalMatrixCanvas.getContext('2d');
+                
+                // Создаем матричную анимацию
+                const columns = Math.floor(chatUserModalMatrixCanvas.width / 20);
+                const drops = [];
+                
+                // Инициализация капель
+                for (let i = 0; i < columns; i++) {
+                    drops[i] = Math.floor(Math.random() * -chatUserModalMatrixCanvas.height);
+                }
+                
+                // Массив символов для матрицы
+                const matrix = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()_+-=[]{}|;:,./<>?";
+                
+                // Функция рисования
+                function drawMatrix() {
+                    chatUserModalMatrixCtx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                    chatUserModalMatrixCtx.fillRect(0, 0, chatUserModalMatrixCanvas.width, chatUserModalMatrixCanvas.height);
+                    
+                    chatUserModalMatrixCtx.fillStyle = '#00ff00';
+                    chatUserModalMatrixCtx.font = '15px Qager';
+                    
+                    // Рисуем символы
+                    for (let i = 0; i < drops.length; i++) {
+                        // Выбираем случайный символ
+                        const text = matrix[Math.floor(Math.random() * matrix.length)];
+                        
+                        // Рисуем символ
+                        chatUserModalMatrixCtx.fillText(text, i * 20, drops[i] * 20);
+                        
+                        // Если достигли дна или случайно - перемещаем наверх
+                        if (drops[i] * 20 > chatUserModalMatrixCanvas.height && Math.random() > 0.975) {
+                            drops[i] = 0;
+                        }
+                        
+                        // Двигаем каплю вниз
+                        drops[i]++;
+                    }
+                }
+                
+                // Запускаем анимацию
+                chatUserModalMatrixIntervalId = setInterval(drawMatrix, 50);
+            }
+            
+            // Функция остановки анимации для модального окна настроек
             function stopModalMatrixAnimation() {
                 if (modalMatrixIntervalId) {
                     clearInterval(modalMatrixIntervalId);
@@ -738,12 +915,55 @@
                 }
             }
             
-            // Обработчик для открытия модального окна, запуска анимации и настройки навигации
+            // Функция остановки анимации для модального окна профиля собеседника
+            function stopChatUserModalMatrixAnimation() {
+                if (chatUserModalMatrixIntervalId) {
+                    clearInterval(chatUserModalMatrixIntervalId);
+                    chatUserModalMatrixIntervalId = null;
+                }
+            }
+            
+            // Обработчик для открытия модального окна своего профиля
             document.getElementById('profileSettings').addEventListener('click', function() {
-                document.getElementById('profileModal').style.display = 'flex';
-                initModalMatrixAnimation();
-                currentModalIndex = 0; // Сбрасываем индекс при открытии
-                setTimeout(setupModalNavigation, 100); // Небольшая задержка для гарантии загрузки
+                // Получаем username текущего пользователя
+                const username = document.querySelector('.username').textContent;
+                console.log('Редактирование профиля:', username);
+                
+                // Запрашиваем данные пользователя с сервера, передавая username как query-параметр
+                fetch(`/profuleuser?username=${username}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        if (data.success) {
+                            // Заполняем поля формы полученными данными
+                            document.getElementById('usernameInput').value = data.username || '';
+                            document.getElementById('nameInput').value = data.name || '';
+                            document.getElementById('surnameInput').value = data.surname || '';
+
+                            // Обновляем аватар, если он есть
+                            const avatarPreview = document.getElementById('profileAvatarPreview');
+                            if (data.avatar) {
+                                if (data.avatar === 'person.png') {
+                                    avatarPreview.src = '/avatar/static/person.png';
+                                    avatarPreview.classList.add('default-avatar');
+                                } else {
+                                    avatarPreview.src = `/static/avatar/${data.avatar}`;
+                                    avatarPreview.classList.remove('default-avatar');
+                                }
+                            }
+
+                            // Отображаем модальное окно
+                            document.getElementById('profileModal').style.display = 'flex';
+                            initModalMatrixAnimation();
+                            currentModalIndex = 0; // Сбрасываем индекс при открытии
+                            setTimeout(setupModalNavigation, 100); // Небольшая задержка для гарантии загрузки
+                        } else {
+                            console.error('Ошибка при получении данных профиля:', data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при запросе данных профиля:', error);
+                    });
             });
             
             // Навигация в модальном окне с помощью стрелок и Enter
@@ -809,7 +1029,7 @@
                 });
             }
             
-            // Обработчик для закрытия модального окна и остановки анимации
+            // Обработчик для крытия модального окна и остановки анимации
             document.getElementById('cancelBtn').addEventListener('click', function() {
                 document.getElementById('profileModal').style.display = 'none';
                 stopModalMatrixAnimation();
@@ -840,6 +1060,7 @@
                     if (data.success) {
                         // Update displayed data
                         document.querySelector('.username').textContent = formData.get('username');
+                        console.log(document);
                         
                         // Update avatar if provided
                         if (data.avatar_path) {
@@ -863,14 +1084,84 @@
                 });
             });
             
+            // Обработчик для крытия модального окна профиля собеседника
+            document.getElementById('closeChatUserProfileBtn').addEventListener('click', function() {
+                document.getElementById('chatUserProfileModal').style.display = 'none';
+                stopChatUserModalMatrixAnimation();
+            });
+            
+            // Обработка нажатий клавиш для модального окна профиля собеседника
+            function handleChatUserModalKeyDown(e) {
+                if (e.key === 'Enter' || e.key === 'Escape') {
+                    e.preventDefault();
+                    document.getElementById('chatUserProfileModal').style.display = 'none';
+                    stopChatUserModalMatrixAnimation();
+                    document.removeEventListener('keydown', handleChatUserModalKeyDown);
+                }
+            }
+            
+            // Добавляем обработчик клавиш при открытии модального окна профиля собеседника
+            document.querySelector('.chat-title').addEventListener('click', function() {
+                if (this.textContent !== '-choice the chat-') {
+                    // Получаем username пользователя из активного чата
+                    const activeChat = document.querySelector('.chat-item.active');
+                    if (activeChat) {
+                        // Получаем username из атрибута data-username, а если его нет, используем data-chat-id
+                        const otherUser_id = activeChat.getAttribute('data-chat-id');
+                        console.log('Просмотр профиля собеседника:', otherUser_id);
+
+                        // Запрашиваем данные пользователя с сервера, передавая username как query-параметр
+                        fetch(`/profuleuser?user_id=${otherUser_id}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log(data);
+                                if (data.success) {
+                                    // Заполняем данные профиля собеседника
+                                    document.getElementById('chatUserUsername').textContent = data.username;
+                                    document.getElementById('chatUserName').textContent = data.name || '-';
+                                    document.getElementById('chatUserSurname').textContent = data.surname || '-';
+
+                                    // Обновляем аватар, если он есть
+                                    const avatarPreview = document.getElementById('chatUserAvatarPreview');
+                                    if (data.avatar) {
+                                        if (data.avatar === 'person.png') {
+                                            avatarPreview.src = '/static/avatar/person.png';
+                                            avatarPreview.classList.add('default-avatar');
+                                        } else {
+                                            avatarPreview.src = `/static/avatar/${data.avatar}`;
+                                            avatarPreview.classList.remove('default-avatar');
+                                        }
+                                    }
+
+                                    // Отображаем модальное окно
+                                    document.getElementById('chatUserProfileModal').style.display = 'flex';
+                                    initChatUserModalMatrixAnimation();
+
+                                    // Добавляем обработчик клавиш
+                                    document.addEventListener('keydown', handleChatUserModalKeyDown);
+                                } else {
+                                    console.error('Ошибка при получении данных профиля:', data.error);
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Ошибка при запросе данных профиля:', error);
+                            });
+                    }
+                }
+            });
+
             // Остановка анимации при изменении размера окна
             window.addEventListener('resize', function() {
                 if (modalMatrixCanvas) {
                     modalMatrixCanvas.width = window.innerWidth;
                     modalMatrixCanvas.height = window.innerHeight;
                 }
+                if (chatUserModalMatrixCanvas) {
+                    chatUserModalMatrixCanvas.width = window.innerWidth;
+                    chatUserModalMatrixCanvas.height = window.innerHeight;
+                }
             });
-            
+
             // Добавим обработчик клика для навигационных элементов модального окна
             modalNavItems.forEach((item, index) => {
                 item.addEventListener('click', function() {
@@ -882,4 +1173,4 @@
         });
     </script>
 </body>
-</html> 
+</html>

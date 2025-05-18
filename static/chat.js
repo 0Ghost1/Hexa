@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 chatItem.innerHTML = `
                     <div class="chat-avatar">
-                        <img src="/static/avatar/${chat.other_user.avatar}" alt="${chat.other_user.username}">
+                        <img src="/static/avatar/${chat.other_user.avatar}" alt="/static/avatar/person.png">
                     </div>
                     <div class="chat-info">
                         <div class="chat-name">${chat.other_user.name} ${chat.other_user.surname}</div>
@@ -222,10 +222,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Загружаем сообщения
                     loadMessages(chat.chat_id);
                     
-                    // Обновляем заголовок чата
+                    // Обновляем заголовок чата и добавляем атрибут с username для просмотра профиля
                     const chatTitle = document.querySelector('.chat-title');
                     if (chatTitle) {
                         chatTitle.textContent = `${chat.other_user.name} ${chat.other_user.surname}`;
+                        chatTitle.setAttribute('data-username', chat.other_user.username);
                     }
                     
                     // Добавляем выделение активного чата и убираем индикатор новых сообщений
@@ -363,13 +364,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Обработчик нажатия Enter в поле ввода
     if (messageInput) {
-        messageInput.addEventListener('keypress', (e) => {
+        messageInput.addEventListener('keydown', (e) => {
+            // Если нажат Enter без Shift - отправляем сообщение
             if (e.key === 'Enter' && !e.shiftKey && messageInput.value.trim()) {
                 e.preventDefault();
                 if (activeChat) {
                     sendMessage(activeChat, messageInput.value.trim());
                     messageInput.value = '';
                 }
+            }
+            // Если нажат Shift+Enter - добавляем перенос строки
+            else if (e.key === 'Enter' && e.shiftKey) {
+                // Позволяем стандартное поведение (добавление новой строки)
+                // Не вызываем preventDefault(), чтобы сработал перенос строки
             }
         });
     }
@@ -427,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             userElement.innerHTML = `
                 <div class="user-avatar">
-                    <img src="/static/avatar/${user.avatar}" alt="${user.username}">
+                    <img src="/static/avatar/${user.avatar}" alt="/static/avatar/person.png">
                 </div>
                 <div class="user-info">
                     <div class="user-name">${user.name} ${user.surname}</div>
@@ -599,7 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Обновляем заголовок чата
             const chatTitle = document.querySelector('.chat-title');
             if (chatTitle) {
-                chatTitle.textContent = 'Выберите чат';
+                chatTitle.textContent = '-choice the chat-';
             }
         }
         
@@ -612,4 +619,4 @@ document.addEventListener('DOMContentLoaded', () => {
     }).catch(error => {
         console.error('Ошибка при инициализации чатов:', error);
     });
-}); 
+});

@@ -301,8 +301,8 @@
             {% endif %}
             <div class="reg-upload-label">[1] upload</div>
             <button type="button" class="avatar-box" tabindex="0" id="avatarSelector">
-                <img id="avatarImg" src="{{ url_for('static', filename='uploads/default-avatar.png') }}" alt="Avatar">
-                <img src="{{ url_for('static', filename='person.png') }}" alt="Upload Avatar" class="avatar-icon">
+                <img id="avatarImg" src="{{ url_for('static', filename='avatar/person.png') }}" alt="Avatar">
+                <img src="{{ url_for('static', filename='avatar/person.png') }}" alt="Upload Avatar" class="avatar-icon">
             </button>
             <input type="file" name="avatar" class="file-input" accept="image/*" id="avatarInput" onchange="previewAvatar(event)">
             <input type="text" name="username" class="reg-input" placeholder="@username" required>

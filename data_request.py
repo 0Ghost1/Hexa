@@ -1,5 +1,5 @@
 from data import db_session
-from other import rename_file
+from other import rename_file, check_file_name
 from data.user import User
 from data.chat import Chat
 from data.message import Message
@@ -11,25 +11,8 @@ startDB()
 
 
 def create_new_user(username, name, surname, sid1, sid2, sid3, sid4, avatar_link=None):
-    """
-    Создает нового пользователя в базе данных
-    
-    Args:
-        username: Имя пользователя
-        name: Имя
-        surname: Фамилия
-        sid1, sid2, sid3, sid4: Хеши SID фраз
-        avatar_link: Путь к аватару (опционально)
-        
-    Returns:
-        int: ID созданного пользователя
-        
-    Raises:
-        Exception: Если возникла ошибка при создании пользователя
-    """
     db_sess = db_session.create_session()
     try:
-        # Проверяем, не существует ли уже пользователь с таким именем
         existing_user = db_sess.query(User).filter(User.username == username).first()
         if existing_user:
             raise ValueError(f"Пользователь с именем {username} уже существует")
@@ -58,15 +41,6 @@ def create_new_user(username, name, surname, sid1, sid2, sid3, sid4, avatar_link
 
 
 def search_user_sid(s1, s2, s3, s4):
-    """
-    Поиск пользователя по SID фразам
-    
-    Args:
-        s1, s2, s3, s4: Хеши SID фраз
-        
-    Returns:
-        int: ID пользователя, если найден, False в противном случае
-    """
     try:
         db_sess = db_session.create_session()
         try:
@@ -88,15 +62,6 @@ def search_user_sid(s1, s2, s3, s4):
 
 
 def check_username(username):
-    """
-    Проверяет, существует ли пользователь с указанным именем пользователя
-    
-    Args:
-        username: Имя пользователя для проверки
-        
-    Returns:
-        bool: True, если пользователь существует, False в противном случае
-    """
     try:
         db_sess = db_session.create_session()
         try:
@@ -205,6 +170,15 @@ def get_user_chats(user_id):
             
             last_message_content = last_message.content if last_message else ""
             last_message_time = last_message.timestamp if last_message else None
+
+            avatar_path = f"static/avatar/{other_user.username}.png"
+            print(avatar_path)
+            
+            if not check_file_name(avatar_path):
+                avatar_filename = "person.png"
+            else:
+                avatar_filename = f"{other_user.username}.png"
+
             
             result.append({
                 'chat_id': chat.id,
@@ -213,7 +187,7 @@ def get_user_chats(user_id):
                     'username': other_user.username,
                     'name': other_user.name,
                     'surname': other_user.surname,
-                    'avatar': f"{other_user.username}.png"
+                    'avatar': avatar_filename
                 },
                 'last_message': {
                     'content': last_message_content,
@@ -235,8 +209,7 @@ def send_message(chat_id, sender_id, content):
 
         if chat.user1_id != sender_id and chat.user2_id != sender_id:
             return False
-        
-        # Создаем новое сообщение
+
         message = Message(
             chat_id=chat_id,
             sender_id=sender_id,
@@ -301,7 +274,7 @@ def search_users(query, current_user_id):
                 'username': user.username,
                 'name': user.name,
                 'surname': user.surname,
-                'avatar': f"{user.username}.png"
+                'avatar': f"{user.username}.png" if check_file_name(f"static/avatar/{user.username}.png") else "person.png"
             })
         
         return result
@@ -320,6 +293,114 @@ def get_chat_participants(chat_id):
     finally:
         db_sess.close()
 
+def get_user(username):
+    db_sess = db_session.create_session()
+    try:
+        user = db_sess.query(User).filter(User.username == username).first()
+        return user
+    finally:
+        db_sess.close()
 
 
+def get_other_user_id_in_chat(chat_id):
+    db_sess = db_session.create_session()
+    try:
+        chat = db_sess.query(Chat).filter(Chat.id == chat_id).first()
+
+        if not chat:
+            return None
+
+        return chat.user2_id
+    finally:
+        db_sess.close()
+
+
+def delete_user_account(username):
+    """
+    Удаляет аккаунт пользователя и все связанные с ним чаты и сообщения.
+
+    Args:
+        username (str): Имя пользователя для удаления
+
+    Returns:
+        bool: True, если удаление прошло успешно, иначе False
+    """
+    db_sess = db_session.create_session()
+    try:
+        user = db_sess.query(User).filter(User.username == username).first()
+
+        user_id = user.id
+
+        chats = db_sess.query(Chat).filter(
+            (Chat.user1_id == user_id) | (Chat.user2_id == user_id)
+        ).all()
+
+        for chat in chats:
+            db_sess.delete(chat)
+
+        db_sess.delete(user)
+        db_sess.commit()
+
+        return (True, f"Пользователь {username} и все его данные успешно удалены")
+    except Exception as e:
+        db_sess.rollback()
+        return (False, f"Ошибка при удалении пользователя: {e}")
+    finally:
+        db_sess.close()
+
+
+def find_user_chats(username):
+    """
+    Ищет все чаты указанного пользователя.
+
+    Args:
+        username (str): Имя пользователя для поиска чатов
+
+    Returns:
+        list: Список словарей с информацией о чатах пользователя
+    """
+    db_sess = db_session.create_session()
+    try:
+        user = db_sess.query(User).filter(User.username == username).first()
+
+        user_id = user.id
+
+        chats = db_sess.query(Chat).filter(
+            (Chat.user1_id == user_id) | (Chat.user2_id == user_id)
+        ).all()
+
+        result = []
+        for chat in chats:
+            other_user_id = chat.user2_id if chat.user1_id == user_id else chat.user1_id
+            other_user = get_user_by_id(other_user_id)
+
+            last_message = db_sess.query(Message).filter(
+                Message.chat_id == chat.id
+            ).order_by(Message.timestamp.desc()).first()
+
+            message_count = db_sess.query(Message).filter(Message.chat_id == chat.id).count()
+
+            result.append({
+                'chat_id': chat.id,
+                'created_date': chat.created_date,
+                'message_count': message_count,
+                'other_user': {
+                    'id': other_user.id,
+                    'username': other_user.username,
+                    'name': other_user.name,
+                    'surname': other_user.surname
+                },
+                'last_message': {
+                    'content': last_message.content if last_message else "",
+                    'timestamp': last_message.timestamp if last_message else None,
+                    'is_own': last_message.sender_id == user_id if last_message else False
+                }
+            })
+
+        return (True, result)
+    except Exception as e:
+        db_sess.rollback()
+        return (False, f"Ошибка при поиске информации пользователя: {e}")
+    finally:
+        db_sess.close()
 
