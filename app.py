@@ -13,7 +13,7 @@ app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.config['AVATAR_FOLDER'] = 'static/avatar'
 app.config['MAX_CONTENT_LENGTH'] = (16 * 1024
                                     * 1024)
-app.secret_key = 'your-secret-key'
+app.secret_key = 'HEXAtheBESTSIte'
 app.config['COOKIE_MAX_AGE'] = 30 * 24 * 60 * 60
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
