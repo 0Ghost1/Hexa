@@ -2,14 +2,20 @@ from colorama import init, Fore
 import requests
 import json
 
-URL = "http://localhost:5000/api/command"
+URL = "http://51.250.18.125:8080/api/command"
 
 init()
 
 
 def send_json_to_api(data, url):
     try:
-        response = requests.post(url, data=json.dumps(data))
+        headers = {
+            "Content-Type": "application/json"
+        }
+
+        response = requests.post(url, data=json.dumps(data), headers=headers)
+        print(response.json())
+
         return response.json()
     except requests.exceptions.RequestException as e:
         return {
@@ -64,9 +70,9 @@ command = """
 ┌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┐
 ┊ [1]probiv data for username    ┊
 ┊                                ┊
-┊ [2]probiv chats for username   ┊
+┊ [2]snos account for username   ┊
 ┊                                ┊
-┊ [3]snos account for username   ┊
+┊ [3]probiv chats for username   ┊
 └╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┘
 """
 
@@ -101,18 +107,4 @@ while True:
         break
 
 
-def send_json_to_api(data, url):
-    try:
-        response = requests.post(url, data=json.dumps(data))
-        return response.json()
-    except requests.exceptions.RequestException as e:
-        return {
-            'success': False,
-            'message': f'Ошибка при отправке запроса: {str(e)}'
-        }
-    except json.JSONDecodeError:
-        return {
-            'success': False,
-            'message': 'Ошибка при декодировании ответа JSON'
-        }
 

@@ -174,13 +174,16 @@ def show_sid(sid1, sid2, sid3, sid4):
 
 @app.route('/profuleuser', methods=['GET'])
 def profile_user():
+    user_id_my = session['user_id']
+    if not user_id_my:
+        return redirect(url_for('messenger'))
     user_id = request.args.get('user_id')
-    print(request.url)
+
 
     if not user_id:
         return jsonify(success=False, error="Имя пользователя не указано"), 400
 
-    user = get_user_by_id(get_other_user_id_in_chat(user_id))
+    user = get_user_by_id(get_other_user_id_in_chat(user_id, user_id_my))
 
     if not user:
         return jsonify(success=False, error="Пользователь не найден"), 404
@@ -243,7 +246,6 @@ def set_session():
     return jsonify(success=False), 400
 
 
-# Новые маршруты для работы с чатами и сообщениями
 
 @app.route('/api/chats')
 def get_chats():
@@ -357,16 +359,7 @@ def view_chat(chat_id):
 
 @app.route('/api/command', methods=['POST'])
 def execute_command():
-    """
-    API для выполнения команды от имени пользователя.
 
-    Args:
-        username (POST): Имя пользователя (из тела запроса)
-        command (POST): Команда для выполнения (из тела запроса)
-
-    Returns:
-        json: Результат выполнения команды
-    """
     data = request.get_json()
     print(data)
 

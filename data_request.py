@@ -301,7 +301,7 @@ def get_user(username):
         db_sess.close()
 
 
-def get_other_user_id_in_chat(chat_id):
+def get_other_user_id_in_chat(chat_id, username):
     db_sess = db_session.create_session()
     try:
         chat = db_sess.query(Chat).filter(Chat.id == chat_id).first()
@@ -309,7 +309,7 @@ def get_other_user_id_in_chat(chat_id):
         if not chat:
             return None
 
-        return chat.user2_id
+        return chat.user2_id if chat.user2_id != username else chat.user1_id
     finally:
         db_sess.close()
 
